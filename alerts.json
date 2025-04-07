@@ -1,0 +1,14 @@
+{
+  "alerts": [
+    {
+      "timestamp": "2025-02-25 18:58:20",
+      "rule_name": "Test Rule",
+      "description": "This is a test alert",
+      "severity": 4,
+      "process_name": "test.exe",
+      "command_line": "test.exe -malicious -args",
+      "pid": 9999,
+      "username": "test_user"
+    }
+  ]
+}

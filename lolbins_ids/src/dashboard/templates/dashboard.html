@@ -1,0 +1,1039 @@
+<!-- templates/dashboard.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOLBins IDS | Security Dashboard</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #34495e;
+            --accent: #3498db;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --success: #2ecc71;
+            --info: #3498db;
+            --light-bg: #ecf0f1;
+            --dark-bg: #1a1a1a;
+            --card-bg: #2c3e50;
+            --text-light: #ecf0f1;
+            --text-dark: #2c3e50;
+            --border-radius: 8px;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Roboto', sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--text-light);
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            background-color: var(--secondary);
+            min-height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            z-index: 1000;
+            transition: all 0.3s;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sidebar-header {
+            padding: 20px 15px;
+            background-color: var(--primary);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-brand {
+            color: var(--text-light);
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+        
+        .sidebar-brand i {
+            margin-right: 10px;
+            color: var(--accent);
+        }
+        
+        .sidebar-menu {
+            padding: 15px 0;
+        }
+        
+        .menu-header {
+            color: rgba(255, 255, 255, 0.5);
+            padding: 10px 25px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 10px;
+        }
+        
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            color: rgba(255, 255, 255, 0.7);
+            padding: 12px 25px;
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+        
+        .sidebar-link i {
+            margin-right: 10px;
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .sidebar-link.active {
+            color: var(--text-light);
+            background-color: rgba(0, 0, 0, 0.1);
+            border-left: 3px solid var(--accent);
+        }
+        
+        .sidebar-link:hover {
+            color: var(--text-light);
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Main content */
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        
+        /* Header */
+        .header {
+            background-color: var(--primary);
+            padding: 15px 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+            margin: 0;
+        }
+        
+        .header-actions {
+            display: flex;
+            align-items: center;
+        }
+        
+        .header-actions .btn {
+            margin-left: 10px;
+        }
+        
+        /* Cards */
+        .card {
+            background-color: var(--card-bg);
+            border: none;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            color: var(--text-light);
+        }
+        
+        .card-header {
+            background-color: rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px 20px;
+            font-weight: 600;
+        }
+        
+        .card-header-actions {
+            float: right;
+        }
+        
+        .card-body {
+            padding: 20px;
+        }
+        
+        /* Stats cards */
+        .stats-card {
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            transition: transform 0.3s;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stats-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .stats-icon i {
+            font-size: 1.5rem;
+        }
+        
+        .stats-info {
+            flex-grow: 1;
+        }
+        
+        .stats-info .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0;
+            line-height: 1;
+        }
+        
+        .stats-info .stat-label {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+        }
+        
+        /* Alert level colors */
+        .bg-alert-critical {
+            background-color: var(--danger);
+        }
+        
+        .bg-alert-high {
+            background-color: #ff5733;
+        }
+        
+        .bg-alert-medium {
+            background-color: var(--warning);
+        }
+        
+        .bg-alert-low {
+            background-color: var(--info);
+        }
+        
+        /* Alerts table */
+        .table {
+            color: var(--text-light);
+        }
+        
+        .table thead th {
+            background-color: rgba(0, 0, 0, 0.2);
+            border-bottom: none;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+        }
+        
+        .table-dark {
+            background-color: var(--secondary);
+        }
+        
+        .alert-row td {
+            border-color: rgba(255, 255, 255, 0.05);
+            padding: 12px 15px;
+            vertical-align: middle;
+        }
+        
+        .alert-row:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        /* Badges */
+        .severity-badge {
+            width: 30px;
+            height: 30px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .severity-1 { background-color: #3498db; } /* Low */
+        .severity-2 { background-color: #2ecc71; } /* Medium-Low */
+        .severity-3 { background-color: #f39c12; } /* Medium */
+        .severity-4 { background-color: #e67e22; } /* Medium-High */
+        .severity-5 { background-color: #e74c3c; } /* High */
+        
+        /* Status indicators */
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .status-indicator i {
+            margin-right: 5px;
+        }
+        
+        .status-active {
+            background-color: rgba(46, 204, 113, 0.2);
+            color: #2ecc71;
+        }
+        
+        /* Chart containers */
+        .chart-container {
+            height: 300px;
+            position: relative;
+        }
+        
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            border-radius: var(--border-radius);
+        }
+        
+        /* Navigation tabs */
+        .custom-tabs {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .custom-tabs .nav-link {
+            color: rgba(255, 255, 255, 0.7);
+            border: none;
+            border-bottom: 3px solid transparent;
+            border-radius: 0;
+            padding: 10px 15px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .custom-tabs .nav-link:hover {
+            color: var(--text-light);
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .custom-tabs .nav-link.active {
+            color: var(--accent);
+            background-color: transparent;
+            border-bottom: 3px solid var(--accent);
+        }
+        
+        /* Buttons */
+        .btn-primary {
+            background-color: var(--accent);
+            border-color: var(--accent);
+        }
+        
+        .btn-outline-light {
+            color: var(--text-light);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Dark scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #2c3e50;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #34495e;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #3498db;
+        }
+        
+        /* Media queries */
+        @media (max-width: 991.98px) {
+            .sidebar {
+                width: 80px;
+            }
+            
+            .sidebar-brand span, .sidebar-link span, .menu-header {
+                display: none;
+            }
+            
+            .sidebar-brand i, .sidebar-link i {
+                margin-right: 0;
+                font-size: 1.3rem;
+            }
+            
+            .sidebar-link {
+                justify-content: center;
+                padding: 15px;
+            }
+            
+            .main-content {
+                margin-left: 80px;
+            }
+        }
+        
+        @media (max-width: 767.98px) {
+            .main-content {
+                margin-left: 0;
+                padding: 15px;
+            }
+            
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .mobile-menu-toggle {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <a href="#" class="sidebar-brand">
+                <i class="fas fa-shield-alt"></i>
+                <span>LOLBins IDS</span>
+            </a>
+        </div>
+        <div class="sidebar-menu">
+            <div class="menu-header">Monitoring</div>
+            <a href="#" class="sidebar-link active">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="alerts.html" class="sidebar-link">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>Alerts</span>
+            </a>
+            <a href="#" class="sidebar-link">
+                <i class="fas fa-chart-line"></i>
+                <span>Analytics</span>
+            </a>
+            
+            <div class="menu-header">Management</div>
+            <a href="#" class="sidebar-link">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </a>
+            <a href="#" class="sidebar-link">
+                <i class="fas fa-file-alt"></i>
+                <span>Reports</span>
+            </a>
+            <a href="#" class="sidebar-link">
+                <i class="fas fa-list-check"></i>
+                <span>Rules</span>
+            </a>
+            <a href="#" class="sidebar-link">
+                <i class="fas fa-shield-halved"></i>
+                <span>Whitelist</span>
+            </a>
+            
+            <div class="menu-header">System</div>
+            <a href="#" class="sidebar-link">
+                <i class="fas fa-info-circle"></i>
+                <span>About</span>
+            </a>
+            <a href="#" class="sidebar-link">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="main-content">
+        <!-- Header -->
+        <div class="header">
+            <h1>Security Dashboard</h1>
+            <div class="header-actions">
+                <span class="status-indicator status-active">
+                    <i class="fas fa-circle"></i> Monitoring Active
+                </span>
+                <button id="refreshBtn" class="btn btn-outline-light btn-sm">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats cards -->
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="stats-card">
+                        <div class="stats-icon bg-alert-low">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="stats-info">
+                            <p class="stat-value" id="totalAlerts">0</p>
+                            <p class="stat-label">Total Alerts</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="stats-card">
+                        <div class="stats-icon bg-alert-critical">
+                            <i class="fas fa-radiation"></i>
+                        </div>
+                        <div class="stats-info">
+                            <p class="stat-value" id="highSeverityAlerts">0</p>
+                            <p class="stat-label">High Severity</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="stats-card">
+                        <div class="stats-icon bg-alert-medium">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stats-info">
+                            <p class="stat-value" id="recentAlerts">0</p>
+                            <p class="stat-label">Last 24 Hours</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="stats-card">
+                        <div class="stats-icon bg-alert-high">
+                            <i class="fas fa-virus"></i>
+                        </div>
+                        <div class="stats-info">
+                            <p class="stat-value" id="uniqueLolbins">0</p>
+                            <p class="stat-label">Unique LOLBins</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main dashboard content -->
+        <div class="row">
+            <!-- Recent alerts table -->
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header">
+                        Recent Alerts
+                        <div class="card-header-actions">
+                            <button class="btn btn-sm btn-outline-light" id="viewAllAlertsBtn">
+                                View All
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Severity</th>
+                                        <th>Timestamp</th>
+                                        <th>Rule</th>
+                                        <th>Process</th>
+                                        <th>User</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="alertsTable">
+                                    <tr>
+                                        <td colspan="6" class="text-center">
+                                            <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                                <span class="visually-hidden">Loading...</span>
+                                            </div>
+                                            Loading...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alerts over time chart -->
+                <div class="card">
+                    <div class="card-header">
+                        Alerts Timeline
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container" id="alertsOverTimeContainer">
+                            <div class="loading-overlay" id="alertsOverTimeLoading">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                            <canvas id="alertsOverTimeChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right sidebar -->
+            <div class="col-lg-4">
+                <!-- Severity distribution -->
+                <div class="card">
+                    <div class="card-header">
+                        Severity Distribution
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container" id="severityContainer">
+                            <div class="loading-overlay" id="severityLoading">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                            <canvas id="severityChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Top LOLBins -->
+                <div class="card">
+                    <div class="card-header">
+                        Top LOLBins
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container" id="lolbinsContainer">
+                            <div class="loading-overlay" id="lolbinsLoading">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                            <canvas id="lolbinsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System status -->
+                <div class="card">
+                    <div class="card-header">
+                        System Status
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between mb-3">
+                            <span>CPU Usage:</span>
+                            <div class="progress" style="width: 70%; height: 10px;">
+                                <div class="progress-bar bg-info" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3">
+                            <span>Memory:</span>
+                            <div class="progress" style="width: 70%; height: 10px;">
+                                <div class="progress-bar bg-warning" role="progressbar" style="width: 45%" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3">
+                            <span>Disk:</span>
+                            <div class="progress" style="width: 70%; height: 10px;">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: 30%" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3">
+                            <span>Network:</span>
+                            <div class="progress" style="width: 70%; height: 10px;">
+                                <div class="progress-bar bg-primary" role="progressbar" style="width: 15%" aria-valuenow="15" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        // Dashboard functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize charts with empty data
+            initializeCharts();
+            
+            // Load data progressively
+            loadSummaryData();
+            setTimeout(() => loadRecentAlerts(), 100);
+            setTimeout(() => loadChartData(), 200);
+            
+            // Set up refresh button
+            document.getElementById('refreshBtn').addEventListener('click', function() {
+                refreshDashboard();
+            });
+        });
+        
+        // Initialize chart objects
+        let alertsOverTimeChart, severityChart, lolbinsChart;
+        
+        function initializeCharts() {
+            // Set default Chart.js options
+            Chart.defaults.color = "#ecf0f1";
+            Chart.defaults.font.family = "'Segoe UI', 'Roboto', sans-serif";
+            
+            // Alerts over time chart
+            const alertsTimeCtx = document.getElementById('alertsOverTimeChart').getContext('2d');
+            alertsOverTimeChart = new Chart(alertsTimeCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Alerts',
+                        data: [],
+                        borderColor: '#3498db',
+                        backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
+                            borderColor: 'rgba(255, 255, 255, 0.1)',
+                            borderWidth: 1
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Severity distribution chart
+            const severityCtx = document.getElementById('severityChart').getContext('2d');
+            severityChart = new Chart(severityCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Low (1)', 'Medium-Low (2)', 'Medium (3)', 'Medium-High (4)', 'High (5)'],
+                    datasets: [{
+                        data: [0, 0, 0, 0, 0],
+                        backgroundColor: [
+                            '#3498db', // Low
+                            '#2ecc71', // Medium-Low
+                            '#f39c12', // Medium
+                            '#e67e22', // Medium-High
+                            '#e74c3c'  // High
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#2c3e50'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                color: 'rgba(255, 255, 255, 0.7)',
+                                usePointStyle: true,
+                                pointStyle: 'circle'
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
+                            borderColor: 'rgba(255, 255, 255, 0.1)',
+                            borderWidth: 1
+                        }
+                    }
+                }
+            });
+            
+            // LOLBins distribution chart
+            const lolbinsCtx = document.getElementById('lolbinsChart').getContext('2d');
+            lolbinsChart = new Chart(lolbinsCtx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Alerts Count',
+                        data: [],
+                        backgroundColor: '#ff7b00',
+                        borderWidth: 0,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
+                            borderColor: 'rgba(255, 255, 255, 0.1)',
+                            borderWidth: 1
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Load summary statistics
+        function loadSummaryData() {
+            fetch('/api/alerts')
+                .then(response => response.json())
+                .then(data => {
+                    // Count total alerts
+                    document.getElementById('totalAlerts').textContent = data.length;
+                    
+                    // Count high severity alerts (4-5)
+                    const highSeverity = data.filter(alert => alert.severity >= 4).length;
+                    document.getElementById('highSeverityAlerts').textContent = highSeverity;
+                    
+                    // Count recent alerts (last 24 hours)
+                    const yesterday = new Date();
+                    yesterday.setDate(yesterday.getDate() - 1);
+                    const recent = data.filter(alert => {
+                        const alertDate = new Date(alert.timestamp);
+                        return alertDate >= yesterday;
+                    }).length;
+                    document.getElementById('recentAlerts').textContent = recent;
+                    
+                    // Count unique LOLBins
+                    const uniqueLolbins = new Set(data.map(alert => alert.process_name)).size;
+                    document.getElementById('uniqueLolbins').textContent = uniqueLolbins;
+                })
+                .catch(error => {
+                    console.error('Error loading summary data:', error);
+                });
+        }
+        
+        // Load recent alerts
+        function loadRecentAlerts() {
+            fetch('/api/alerts')
+                .then(response => response.json())
+                .then(data => {
+                    const tbody = document.getElementById('alertsTable');
+                    tbody.innerHTML = '';
+                    
+                    if (data.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="6" class="text-center">No alerts found</td></tr>';
+                        return;
+                    }
+                    
+                    // Show the most recent 10 alerts
+                    data.slice(0, 10).forEach(alert => {
+                        const tr = document.createElement('tr');
+                        tr.className = 'alert-row';
+                        
+                        // Severity
+                        const tdSeverity = document.createElement('td');
+                        const severityBadge = document.createElement('span');
+                        severityBadge.className = `severity-badge severity-${alert.severity}`;
+                        severityBadge.textContent = alert.severity;
+                        tdSeverity.appendChild(severityBadge);
+                        tr.appendChild(tdSeverity);
+                        
+                        // Timestamp
+                        const tdTime = document.createElement('td');
+                        tdTime.textContent = alert.timestamp;
+                        tr.appendChild(tdTime);
+                        
+                        // Rule
+                        const tdRule = document.createElement('td');
+                        tdRule.textContent = alert.rule_name;
+                        tr.appendChild(tdRule);
+                        
+                        // Process
+                        const tdProcess = document.createElement('td');
+                        tdProcess.textContent = alert.process_name;
+                        tr.appendChild(tdProcess);
+                        
+                        // User
+                        const tdUser = document.createElement('td');
+                        tdUser.textContent = alert.username;
+                        tr.appendChild(tdUser);
+                        
+                        // Actions
+                        const tdActions = document.createElement('td');
+                        const viewBtn = document.createElement('button');
+                        viewBtn.className = 'btn btn-sm btn-outline-light me-1';
+                        viewBtn.innerHTML = '<i class="fas fa-eye"></i>';
+                        viewBtn.title = 'View Details';
+                        
+                        const ignoreBtn = document.createElement('button');
+                        ignoreBtn.className = 'btn btn-sm btn-outline-danger';
+                        ignoreBtn.innerHTML = '<i class="fas fa-ban"></i>';
+                        ignoreBtn.title = 'Ignore Alert';
+                        
+                        tdActions.appendChild(viewBtn);
+                        tdActions.appendChild(ignoreBtn);
+                        tr.appendChild(tdActions);
+                        
+                        tbody.appendChild(tr);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading alerts:', error);
+                    document.getElementById('alertsTable').innerHTML = 
+                        '<tr><td colspan="6" class="text-center text-danger">Error loading alerts</td></tr>';
+                });
+        }
+        
+        // Load chart data
+        function loadChartData() {
+            fetch('/api/alerts')
+                .then(response => response.json())
+                .then(data => {
+                    updateAlertsOverTimeChart(data);
+                    updateSeverityChart(data);
+                    updateLolbinsChart(data);
+                })
+                .catch(error => {
+                    console.error('Error loading chart data:', error);
+                });
+        }
+        
+        // Update alerts over time chart
+        function updateAlertsOverTimeChart(data) {
+            // Group alerts by date
+            const dates = {};
+            data.forEach(alert => {
+                const date = alert.timestamp.split(' ')[0];
+                dates[date] = (dates[date] || 0) + 1;
+            });
+            
+            // Convert to arrays for Chart.js
+            const sortedDates = Object.keys(dates).sort();
+            const counts = sortedDates.map(date => dates[date]);
+            
+            // Update chart
+            alertsOverTimeChart.data.labels = sortedDates;
+            alertsOverTimeChart.data.datasets[0].data = counts;
+            alertsOverTimeChart.update();
+            
+            // Hide loading indicator
+            document.getElementById('alertsOverTimeLoading').style.display = 'none';
+        }
+        
+        // Update severity distribution chart
+        function updateSeverityChart(data) {
+            // Count alerts by severity
+            const severityCounts = [0, 0, 0, 0, 0]; // Severity 1-5
+            
+            data.forEach(alert => {
+                const severity = alert.severity;
+                if (severity >= 1 && severity <= 5) {
+                    severityCounts[severity - 1]++;
+                }
+            });
+            
+            // Update chart
+            severityChart.data.datasets[0].data = severityCounts;
+            severityChart.update();
+            
+            // Hide loading indicator
+            document.getElementById('severityLoading').style.display = 'none';
+        }
+        
+        // Update LOLBins chart
+        function updateLolbinsChart(data) {
+            // Count alerts by LOLBin
+            const lolbinCounts = {};
+            data.forEach(alert => {
+                const process = alert.process_name;
+                lolbinCounts[process] = (lolbinCounts[process] || 0) + 1;
+            });
+            
+            // Sort by count (descending)
+            const sortedLolbins = Object.entries(lolbinCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5); // Top 5
+            
+            // Update chart
+            lolbinsChart.data.labels = sortedLolbins.map(item => item[0]);
+            lolbinsChart.data.datasets[0].data = sortedLolbins.map(item => item[1]);
+            lolbinsChart.update();
+            
+            // Hide loading indicator
+            document.getElementById('lolbinsLoading').style.display = 'none';
+        }
+        
+        // Refresh all dashboard data
+        function refreshDashboard() {
+            // Show loading indicators
+            document.getElementById('alertsOverTimeLoading').style.display = 'flex';
+            document.getElementById('severityLoading').style.display = 'flex';
+            document.getElementById('lolbinsLoading').style.display = 'flex';
+            
+            // Reload all data
+            loadSummaryData();
+            loadRecentAlerts();
+            loadChartData();
+        }
+    </script>
+</body>
+</html>

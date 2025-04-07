@@ -1,0 +1,99 @@
+2025-02-27 18:54:36,492 - INFO - Enhanced Rule Engine initialized with 7 rules
+2025-02-27 18:54:36,494 - INFO - Alert Manager initialized with 2 alert methods
+2025-02-27 18:54:36,495 - INFO - Performance monitor initialized
+2025-02-27 18:54:36,495 - INFO - Integration test initialized
+2025-02-27 18:54:36,495 - INFO - Starting integration tests
+2025-02-27 18:54:36,496 - INFO - Performance monitoring started (interval: 5s)
+2025-02-27 18:54:36,497 - INFO - Running test 1/10: CertUtil downloading executable from malicious domain
+2025-02-27 18:54:36,497 - WARNING - Rule triggered: CertUtil Download (Severity: 4)
+2025-02-27 18:54:36,511 - INFO - Test 1 PASSED: CertUtil downloading executable from malicious domain
+2025-02-27 18:54:37,012 - INFO - Running test 2/10: PowerShell encoded command for reverse shell
+2025-02-27 18:54:37,016 - WARNING - Rule triggered: PowerShell Encoded Command (Severity: 4)
+2025-02-27 18:54:37,038 - INFO - Test 2 PASSED: PowerShell encoded command for reverse shell
+2025-02-27 18:54:37,542 - INFO - Running test 3/10: Regsvr32 AppLocker bypass technique
+2025-02-27 18:54:37,543 - WARNING - Rule triggered: Regsvr32 AppLocker Bypass (Severity: 5)
+2025-02-27 18:54:37,596 - INFO - Test 3 PASSED: Regsvr32 AppLocker bypass technique
+2025-02-27 18:54:38,097 - INFO - Running test 4/10: MSHTA executing remote JavaScript
+2025-02-27 18:54:38,098 - WARNING - Rule triggered: MSHTA Suspicious Execution (Severity: 4)
+2025-02-27 18:54:38,180 - INFO - Test 4 PASSED: MSHTA executing remote JavaScript
+2025-02-27 18:54:38,682 - INFO - Running test 5/10: WMIC creating PowerShell process with encoded command
+2025-02-27 18:54:38,684 - WARNING - Rule triggered: WMIC Process Creation (Severity: 3)
+2025-02-27 18:54:38,774 - INFO - Test 5 PASSED: WMIC creating PowerShell process with encoded command
+2025-02-27 18:54:39,275 - INFO - Running test 6/10: CertUtil legitimate certificate verification
+2025-02-27 18:54:39,276 - INFO - Test 6 PASSED: CertUtil legitimate certificate verification
+2025-02-27 18:54:39,777 - INFO - Running test 7/10: PowerShell legitimate process listing
+2025-02-27 18:54:39,778 - INFO - Test 7 PASSED: PowerShell legitimate process listing
+2025-02-27 18:54:40,280 - INFO - Running test 8/10: Regsvr32 legitimate DLL registration
+2025-02-27 18:54:40,281 - INFO - Test 8 PASSED: Regsvr32 legitimate DLL registration
+2025-02-27 18:54:40,782 - INFO - Running test 9/10: CertUtil downloading from whitelisted domain
+2025-02-27 18:54:40,782 - INFO - Test 9 PASSED: CertUtil downloading from whitelisted domain
+2025-02-27 18:54:41,283 - INFO - Running test 10/10: Regsvr32 with whitelisted command
+2025-02-27 18:54:41,285 - INFO - Test 10 PASSED: Regsvr32 with whitelisted command
+2025-02-27 18:54:42,546 - INFO - Performance monitoring stopped
+2025-02-27 18:54:42,549 - INFO - Integration tests completed: 10/10 passed (100.0%)
+2025-03-10 14:29:00,029 - INFO - Enhanced Rule Engine initialized with 7 rules
+2025-03-10 14:29:00,040 - INFO - Alert Manager initialized with 2 alert methods
+2025-03-10 14:29:00,041 - INFO - Performance monitor initialized
+2025-03-10 14:29:00,041 - INFO - Integration test initialized
+2025-03-10 14:29:00,041 - INFO - Starting integration tests
+2025-03-10 14:29:00,042 - INFO - Performance monitoring started (interval: 5s)
+2025-03-10 14:29:00,043 - INFO - Running test 1/10: CertUtil downloading executable from malicious domain
+2025-03-10 14:29:00,043 - WARNING - Rule triggered: CertUtil Download (Severity: 4)
+2025-03-10 14:29:00,124 - INFO - Test 1 PASSED: CertUtil downloading executable from malicious domain
+2025-03-10 14:29:00,625 - INFO - Running test 2/10: PowerShell encoded command for reverse shell
+2025-03-10 14:29:00,626 - WARNING - Rule triggered: PowerShell Encoded Command (Severity: 4)
+2025-03-10 14:29:00,718 - INFO - Test 2 PASSED: PowerShell encoded command for reverse shell
+2025-03-10 14:29:01,219 - INFO - Running test 3/10: Regsvr32 AppLocker bypass technique
+2025-03-10 14:29:01,221 - WARNING - Rule triggered: Regsvr32 AppLocker Bypass (Severity: 5)
+2025-03-10 14:29:01,324 - INFO - Test 3 PASSED: Regsvr32 AppLocker bypass technique
+2025-03-10 14:29:01,825 - INFO - Running test 4/10: MSHTA executing remote JavaScript
+2025-03-10 14:29:01,827 - WARNING - Rule triggered: MSHTA Suspicious Execution (Severity: 4)
+2025-03-10 14:29:01,929 - INFO - Test 4 PASSED: MSHTA executing remote JavaScript
+2025-03-10 14:29:02,430 - INFO - Running test 5/10: WMIC creating PowerShell process with encoded command
+2025-03-10 14:29:02,430 - WARNING - Rule triggered: WMIC Process Creation (Severity: 3)
+2025-03-10 14:29:02,475 - INFO - Test 5 PASSED: WMIC creating PowerShell process with encoded command
+2025-03-10 14:29:02,977 - INFO - Running test 6/10: CertUtil legitimate certificate verification
+2025-03-10 14:29:02,978 - INFO - Test 6 PASSED: CertUtil legitimate certificate verification
+2025-03-10 14:29:03,479 - INFO - Running test 7/10: PowerShell legitimate process listing
+2025-03-10 14:29:03,480 - INFO - Test 7 PASSED: PowerShell legitimate process listing
+2025-03-10 14:29:03,981 - INFO - Running test 8/10: Regsvr32 legitimate DLL registration
+2025-03-10 14:29:03,984 - INFO - Test 8 PASSED: Regsvr32 legitimate DLL registration
+2025-03-10 14:29:04,485 - INFO - Running test 9/10: CertUtil downloading from whitelisted domain
+2025-03-10 14:29:04,487 - INFO - Test 9 PASSED: CertUtil downloading from whitelisted domain
+2025-03-10 14:29:04,989 - INFO - Running test 10/10: Regsvr32 with whitelisted command
+2025-03-10 14:29:04,991 - INFO - Test 10 PASSED: Regsvr32 with whitelisted command
+2025-03-10 14:29:06,085 - INFO - Performance monitoring stopped
+2025-03-10 14:29:06,089 - INFO - Integration tests completed: 10/10 passed (100.0%)
+2025-03-10 15:17:15,769 - INFO - Enhanced Rule Engine initialized with 7 rules
+2025-03-10 15:17:15,770 - INFO - Alert Manager initialized with 2 alert methods
+2025-03-10 15:17:15,770 - INFO - Performance monitor initialized
+2025-03-10 15:17:15,770 - INFO - Integration test initialized
+2025-03-10 15:17:15,770 - INFO - Starting integration tests
+2025-03-10 15:17:15,770 - INFO - Performance monitoring started (interval: 5s)
+2025-03-10 15:17:15,771 - INFO - Running test 1/10: CertUtil downloading executable from malicious domain
+2025-03-10 15:17:15,771 - WARNING - Rule triggered: CertUtil Download (Severity: 4)
+2025-03-10 15:17:15,873 - INFO - Test 1 PASSED: CertUtil downloading executable from malicious domain
+2025-03-10 15:17:16,374 - INFO - Running test 2/10: PowerShell encoded command for reverse shell
+2025-03-10 15:17:16,375 - WARNING - Rule triggered: PowerShell Encoded Command (Severity: 4)
+2025-03-10 15:17:16,502 - INFO - Test 2 PASSED: PowerShell encoded command for reverse shell
+2025-03-10 15:17:17,002 - INFO - Running test 3/10: Regsvr32 AppLocker bypass technique
+2025-03-10 15:17:17,005 - WARNING - Rule triggered: Regsvr32 AppLocker Bypass (Severity: 5)
+2025-03-10 15:17:17,142 - INFO - Test 3 PASSED: Regsvr32 AppLocker bypass technique
+2025-03-10 15:17:17,643 - INFO - Running test 4/10: MSHTA executing remote JavaScript
+2025-03-10 15:17:17,644 - WARNING - Rule triggered: MSHTA Suspicious Execution (Severity: 4)
+2025-03-10 15:17:17,751 - INFO - Test 4 PASSED: MSHTA executing remote JavaScript
+2025-03-10 15:17:18,252 - INFO - Running test 5/10: WMIC creating PowerShell process with encoded command
+2025-03-10 15:17:18,253 - WARNING - Rule triggered: WMIC Process Creation (Severity: 3)
+2025-03-10 15:17:18,387 - INFO - Test 5 PASSED: WMIC creating PowerShell process with encoded command
+2025-03-10 15:17:18,889 - INFO - Running test 6/10: CertUtil legitimate certificate verification
+2025-03-10 15:17:18,890 - INFO - Test 6 PASSED: CertUtil legitimate certificate verification
+2025-03-10 15:17:19,391 - INFO - Running test 7/10: PowerShell legitimate process listing
+2025-03-10 15:17:19,391 - INFO - Test 7 PASSED: PowerShell legitimate process listing
+2025-03-10 15:17:19,891 - INFO - Running test 8/10: Regsvr32 legitimate DLL registration
+2025-03-10 15:17:19,892 - INFO - Test 8 PASSED: Regsvr32 legitimate DLL registration
+2025-03-10 15:17:20,392 - INFO - Running test 9/10: CertUtil downloading from whitelisted domain
+2025-03-10 15:17:20,393 - INFO - Test 9 PASSED: CertUtil downloading from whitelisted domain
+2025-03-10 15:17:20,894 - INFO - Running test 10/10: Regsvr32 with whitelisted command
+2025-03-10 15:17:20,894 - INFO - Test 10 PASSED: Regsvr32 with whitelisted command
+2025-03-10 15:17:21,792 - INFO - Performance monitoring stopped
+2025-03-10 15:17:21,793 - INFO - Integration tests completed: 10/10 passed (100.0%)

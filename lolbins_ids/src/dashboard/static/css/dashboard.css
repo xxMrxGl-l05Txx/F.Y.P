@@ -1,0 +1,57 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f5f5;
+}
+
+#sidebar {
+    min-height: 100vh;
+    position: sticky;
+    top: 0;
+}
+
+#sidebar .nav-link {
+    color: #ccc;
+    padding: 10px 15px;
+    margin-bottom: 5px;
+}
+
+#sidebar .nav-link.active {
+    color: white;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+}
+
+#sidebar .nav-link:hover {
+    color: white;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 5px;
+}
+
+.card {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    margin-bottom: 1rem;
+}
+
+.severity-badge {
+    width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: white;
+    font-weight: bold;
+}
+
+.severity-1 { background-color: #28a745; }
+.severity-2 { background-color: #17a2b8; }
+.severity-3 { background-color: #ffc107; }
+.severity-4 { background-color: #fd7e14; }
+.severity-5 { background-color: #dc3545; }
+
+.alert-detail {
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    padding: 10px;
+    margin-top: 5px;
+}

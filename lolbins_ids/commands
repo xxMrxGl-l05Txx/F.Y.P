@@ -1,0 +1,7 @@
+cd D:\FYP\lolbins_ids\tests
+
+python integration_test.py
+
+cd D:\FYP\lolbins_ids\src\monitor 
+
+python process_monitor.py --continuous 10

@@ -1,0 +1,111 @@
+2025-02-07 19:14:09,865 - WARNING - LOLBin Detected!
+Timestamp: 2025-02-07 19:14:09
+Process Name: powershell.exe
+PID: 1864
+User: DESKTOP-908K078\asus
+Command Line: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -noexit -command try { . "c:\Users\asus\AppData\Local\Programs\Microsoft VS Code\resources\app\out\vs\workbench\contrib\terminal\common\scripts\shellIntegration.ps1" } catch {}
+
+2025-02-07 19:14:10,223 - WARNING - LOLBin Detected!
+Timestamp: 2025-02-07 19:14:10
+Process Name: powershell.exe
+PID: 8184
+User: DESKTOP-908K078\asus
+Command Line: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -noexit -command try { . "c:\Users\asus\AppData\Local\Programs\Microsoft VS Code\resources\app\out\vs\workbench\contrib\terminal\common\scripts\shellIntegration.ps1" } catch {}
+
+2025-02-07 19:14:10,388 - WARNING - LOLBin Detected!
+Timestamp: 2025-02-07 19:14:10
+Process Name: powershell.exe
+PID: 20836
+User: DESKTOP-908K078\asus
+Command Line: C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -noexit -command try { . "c:\Users\asus\AppData\Local\Programs\Microsoft VS Code\resources\app\out\vs\workbench\contrib\terminal\common\scripts\shellIntegration.ps1" } catch {}
+
+2025-02-25 19:02:44,685 - INFO - Rule Engine initialized with 5 rules
+2025-02-25 19:02:44,686 - INFO - Alert Manager initialized with 2 alert methods
+2025-02-25 19:02:44,687 - INFO - Process Monitor initialized successfully
+2025-02-25 19:02:44,687 - INFO - Starting continuous monitoring (interval: 10s)
+2025-02-25 19:02:44,687 - INFO - Starting LOLBins monitoring...
+2025-02-25 19:02:45,094 - INFO - LOLBin detected: powershell.exe (PID: 10800)
+2025-02-25 19:02:45,094 - INFO - No suspicious behavior detected for powershell.exe
+2025-02-25 19:02:45,172 - INFO - LOLBin detected: powershell.exe (PID: 17968)
+2025-02-25 19:02:45,173 - INFO - No suspicious behavior detected for powershell.exe
+2025-02-25 19:02:45,202 - INFO - LOLBin detected: powershell.exe (PID: 22356)
+2025-02-25 19:02:45,202 - INFO - No suspicious behavior detected for powershell.exe
+2025-02-25 19:02:45,202 - INFO - LOLBin detected: powershell.exe (PID: 22388)
+2025-02-25 19:02:45,202 - INFO - No suspicious behavior detected for powershell.exe
+2025-02-25 19:02:45,211 - INFO - LOLBin detected: powershell.exe (PID: 26220)
+2025-02-25 19:02:45,211 - INFO - No suspicious behavior detected for powershell.exe
+2025-02-25 19:02:55,214 - INFO - Starting LOLBins monitoring...
+2025-02-25 19:02:55,503 - INFO - LOLBin detected: powershell.exe (PID: 10800)
+2025-02-25 19:02:55,503 - INFO - No suspicious behavior detected for powershell.exe
+2025-02-25 19:02:55,563 - INFO - LOLBin detected: powershell.exe (PID: 17968)
+2025-02-25 19:02:55,563 - INFO - No suspicious behavior detected for powershell.exe
+2025-02-25 19:02:55,583 - INFO - LOLBin detected: powershell.exe (PID: 22356)
+2025-02-25 19:02:55,583 - INFO - No suspicious behavior detected for powershell.exe
+2025-02-25 19:02:55,583 - INFO - LOLBin detected: powershell.exe (PID: 22388)
+2025-02-25 19:02:55,583 - INFO - No suspicious behavior detected for powershell.exe
+2025-02-25 19:02:55,589 - INFO - LOLBin detected: powershell.exe (PID: 26220)
+2025-02-25 19:02:55,589 - INFO - No suspicious behavior detected for powershell.exe
+2025-02-25 19:02:57,441 - INFO - Monitoring stopped by user
+2025-03-10 12:41:32,962 - INFO - Rule Engine initialized with 5 rules
+2025-03-10 12:41:32,963 - INFO - Alert Manager initialized with 2 alert methods
+2025-03-10 12:41:32,964 - INFO - Process Monitor initialized successfully
+2025-03-10 12:41:32,964 - INFO - Starting continuous monitoring (interval: 10s)
+2025-03-10 12:41:32,964 - INFO - Starting LOLBins monitoring...
+2025-03-10 12:41:33,880 - INFO - LOLBin detected: powershell.exe (PID: 17696)
+2025-03-10 12:41:33,880 - INFO - No suspicious behavior detected for powershell.exe
+2025-03-10 12:41:33,931 - INFO - LOLBin detected: powershell.exe (PID: 18824)
+2025-03-10 12:41:33,931 - INFO - No suspicious behavior detected for powershell.exe
+2025-03-10 12:41:33,973 - INFO - LOLBin detected: powershell.exe (PID: 25108)
+2025-03-10 12:41:33,974 - INFO - No suspicious behavior detected for powershell.exe
+2025-03-10 12:41:44,038 - INFO - Starting LOLBins monitoring...
+2025-03-10 12:41:44,783 - INFO - LOLBin detected: powershell.exe (PID: 17696)
+2025-03-10 12:41:44,783 - INFO - No suspicious behavior detected for powershell.exe
+2025-03-10 12:41:44,821 - INFO - LOLBin detected: powershell.exe (PID: 18824)
+2025-03-10 12:41:44,822 - INFO - No suspicious behavior detected for powershell.exe
+2025-03-10 12:41:44,853 - INFO - LOLBin detected: powershell.exe (PID: 25108)
+2025-03-10 12:41:44,853 - INFO - No suspicious behavior detected for powershell.exe
+2025-03-10 12:41:54,894 - INFO - Starting LOLBins monitoring...
+2025-03-10 12:41:55,530 - INFO - LOLBin detected: powershell.exe (PID: 17696)
+2025-03-10 12:41:55,530 - INFO - No suspicious behavior detected for powershell.exe
+2025-03-10 12:41:55,559 - INFO - LOLBin detected: powershell.exe (PID: 18824)
+2025-03-10 12:41:55,559 - INFO - No suspicious behavior detected for powershell.exe
+2025-03-10 12:41:55,594 - INFO - LOLBin detected: powershell.exe (PID: 25108)
+2025-03-10 12:41:55,595 - INFO - No suspicious behavior detected for powershell.exe
+2025-03-10 12:41:58,465 - INFO - Monitoring stopped by user
+2025-03-10 14:29:26,634 - INFO - Rule Engine initialized with 5 rules
+2025-03-10 14:29:26,635 - INFO - Alert Manager initialized with 2 alert methods
+2025-03-10 14:29:26,635 - INFO - Process Monitor initialized successfully
+2025-03-10 14:29:26,635 - INFO - Starting continuous monitoring (interval: 10s)
+2025-03-10 14:29:26,636 - INFO - Starting LOLBins monitoring...
+2025-03-10 14:29:27,445 - INFO - LOLBin detected: powershell.exe (PID: 7800)
+2025-03-10 14:29:27,445 - INFO - No suspicious behavior detected for powershell.exe
+2025-03-10 14:29:27,510 - INFO - LOLBin detected: powershell.exe (PID: 10048)
+2025-03-10 14:29:27,510 - INFO - No suspicious behavior detected for powershell.exe
+2025-03-10 14:29:27,610 - INFO - LOLBin detected: powershell.exe (PID: 16356)
+2025-03-10 14:29:27,610 - INFO - No suspicious behavior detected for powershell.exe
+2025-03-10 14:29:27,637 - INFO - LOLBin detected: powershell.exe (PID: 21072)
+2025-03-10 14:29:27,638 - INFO - No suspicious behavior detected for powershell.exe
+2025-03-10 14:29:31,896 - INFO - Monitoring stopped by user
+2025-03-10 15:18:00,676 - INFO - Rule Engine initialized with 5 rules
+2025-03-10 15:18:00,677 - INFO - Alert Manager initialized with 2 alert methods
+2025-03-10 15:18:00,677 - INFO - Process Monitor initialized successfully
+2025-03-10 15:18:00,677 - INFO - Starting continuous monitoring (interval: 10s)
+2025-03-10 15:18:00,677 - INFO - Starting LOLBins monitoring...
+2025-03-10 15:18:01,133 - INFO - LOLBin detected: powershell.exe (PID: 7800)
+2025-03-10 15:18:01,133 - INFO - No suspicious behavior detected for powershell.exe
+2025-03-10 15:18:01,172 - INFO - LOLBin detected: powershell.exe (PID: 10048)
+2025-03-10 15:18:01,172 - INFO - No suspicious behavior detected for powershell.exe
+2025-03-10 15:18:01,250 - INFO - LOLBin detected: powershell.exe (PID: 16356)
+2025-03-10 15:18:01,250 - INFO - No suspicious behavior detected for powershell.exe
+2025-03-10 15:18:01,277 - INFO - LOLBin detected: powershell.exe (PID: 21072)
+2025-03-10 15:18:01,277 - INFO - No suspicious behavior detected for powershell.exe
+2025-03-10 15:18:11,300 - INFO - Starting LOLBins monitoring...
+2025-03-10 15:18:11,625 - INFO - LOLBin detected: powershell.exe (PID: 7800)
+2025-03-10 15:18:11,625 - INFO - No suspicious behavior detected for powershell.exe
+2025-03-10 15:18:11,653 - INFO - LOLBin detected: powershell.exe (PID: 10048)
+2025-03-10 15:18:11,653 - INFO - No suspicious behavior detected for powershell.exe
+2025-03-10 15:18:11,702 - INFO - LOLBin detected: powershell.exe (PID: 16356)
+2025-03-10 15:18:11,702 - INFO - No suspicious behavior detected for powershell.exe
+2025-03-10 15:18:11,720 - INFO - LOLBin detected: powershell.exe (PID: 21072)
+2025-03-10 15:18:11,720 - INFO - No suspicious behavior detected for powershell.exe
+2025-03-10 15:18:17,524 - INFO - Monitoring stopped by user

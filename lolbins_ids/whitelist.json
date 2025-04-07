@@ -1,0 +1,18 @@
+{
+    "whitelist": {
+      "commands": [
+        "windows\\system32\\certutil.exe -verify",
+        "regsvr32.exe /s /n /i:/MLDisplayX.dll",
+        "bitsadmin.exe /list /allusers"
+      ],
+      "processes": [
+        "svchost.exe",
+        "explorer.exe",
+        "winlogon.exe"
+      ],
+      "users": [
+        "NT AUTHORITY\\SYSTEM",
+        "NT AUTHORITY\\LOCAL SERVICE"
+      ]
+    }
+  }

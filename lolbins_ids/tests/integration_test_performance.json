@@ -1,0 +1,21 @@
+{
+  "timestamp": "2025-03-10 15:17:21",
+  "system": {
+    "avg_cpu_percent": 10.3,
+    "avg_memory_percent": 68.4,
+    "current_cpu_percent": 10.3,
+    "current_memory_percent": 68.4
+  },
+  "ids": {
+    "total_processes_analyzed": 10,
+    "total_alerts_generated": 5,
+    "avg_execution_time_ms": 0.34,
+    "top_triggered_rules": {
+      "CertUtil Download": 1,
+      "PowerShell Encoded Command": 1,
+      "Regsvr32 AppLocker Bypass": 1,
+      "MSHTA Suspicious Execution": 1,
+      "WMIC Process Creation": 1
+    }
+  }
+}

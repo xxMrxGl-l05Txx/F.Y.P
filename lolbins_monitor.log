@@ -1,0 +1,26 @@
+2025-02-25 18:46:57,063 - INFO - Rule Engine initialized with 5 rules
+2025-02-25 18:46:57,063 - INFO - Starting LOLBins monitoring...
+2025-02-25 18:46:57,572 - INFO - LOLBin detected: powershell.exe (PID: 10800)
+2025-02-25 18:46:57,572 - INFO - No suspicious behavior detected for powershell.exe
+2025-02-25 18:46:57,677 - INFO - LOLBin detected: powershell.exe (PID: 17968)
+2025-02-25 18:46:57,677 - INFO - No suspicious behavior detected for powershell.exe
+2025-02-25 18:46:57,726 - INFO - LOLBin detected: powershell.exe (PID: 22356)
+2025-02-25 18:46:57,726 - INFO - No suspicious behavior detected for powershell.exe
+2025-02-25 18:46:57,729 - INFO - LOLBin detected: powershell.exe (PID: 22388)
+2025-02-25 18:46:57,729 - INFO - No suspicious behavior detected for powershell.exe
+2025-02-25 18:46:57,740 - INFO - LOLBin detected: powershell.exe (PID: 26220)
+2025-02-25 18:46:57,740 - INFO - No suspicious behavior detected for powershell.exe
+2025-02-25 19:00:01,446 - INFO - Rule Engine initialized with 5 rules
+2025-02-25 19:00:01,447 - INFO - Alert Manager initialized with 2 alert methods
+2025-02-25 19:00:01,447 - INFO - Process Monitor initialized successfully
+2025-02-25 19:00:01,447 - INFO - Starting LOLBins monitoring...
+2025-02-25 19:00:01,863 - INFO - LOLBin detected: powershell.exe (PID: 10800)
+2025-02-25 19:00:01,863 - INFO - No suspicious behavior detected for powershell.exe
+2025-02-25 19:00:01,944 - INFO - LOLBin detected: powershell.exe (PID: 17968)
+2025-02-25 19:00:01,944 - INFO - No suspicious behavior detected for powershell.exe
+2025-02-25 19:00:01,975 - INFO - LOLBin detected: powershell.exe (PID: 22356)
+2025-02-25 19:00:01,975 - INFO - No suspicious behavior detected for powershell.exe
+2025-02-25 19:00:01,976 - INFO - LOLBin detected: powershell.exe (PID: 22388)
+2025-02-25 19:00:01,976 - INFO - No suspicious behavior detected for powershell.exe
+2025-02-25 19:00:01,984 - INFO - LOLBin detected: powershell.exe (PID: 26220)
+2025-02-25 19:00:01,984 - INFO - No suspicious behavior detected for powershell.exe

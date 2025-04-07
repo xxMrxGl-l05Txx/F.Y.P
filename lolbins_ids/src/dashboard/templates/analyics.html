@@ -1,0 +1,1356 @@
+<!-- templates/analytics.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOLBins IDS | Analytics</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Same style as the dashboard -->
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #34495e;
+            --accent: #3498db;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --success: #2ecc71;
+            --info: #3498db;
+            --light-bg: #ecf0f1;
+            --dark-bg: #1a1a1a;
+            --card-bg: #2c3e50;
+            --text-light: #ecf0f1;
+            --text-dark: #2c3e50;
+            --border-radius: 8px;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Roboto', sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--text-light);
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            background-color: var(--secondary);
+            min-height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            z-index: 1000;
+            transition: all 0.3s;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sidebar-header {
+            padding: 20px 15px;
+            background-color: var(--primary);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-brand {
+            color: var(--text-light);
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+        
+        .sidebar-brand i {
+            margin-right: 10px;
+            color: var(--accent);
+        }
+        
+        .sidebar-menu {
+            padding: 15px 0;
+        }
+        
+        .menu-header {
+            color: rgba(255, 255, 255, 0.5);
+            padding: 10px 25px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 10px;
+        }
+        
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            color: rgba(255, 255, 255, 0.7);
+            padding: 12px 25px;
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+        
+        .sidebar-link i {
+            margin-right: 10px;
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .sidebar-link.active {
+            color: var(--text-light);
+            background-color: rgba(0, 0, 0, 0.1);
+            border-left: 3px solid var(--accent);
+        }
+        
+        .sidebar-link:hover {
+            color: var(--text-light);
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Main content */
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        
+        /* Header */
+        .header {
+            background-color: var(--primary);
+            padding: 15px 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+            margin: 0;
+        }
+        
+        .header-actions {
+            display: flex;
+            align-items: center;
+        }
+        
+        .header-actions .btn {
+            margin-left: 10px;
+        }
+        
+        /* Cards */
+        .card {
+            background-color: var(--card-bg);
+            border: none;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            color: var(--text-light);
+        }
+        
+        .card-header {
+            background-color: rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px 20px;
+            font-weight: 600;
+        }
+        
+        .card-body {
+            padding: 20px;
+        }
+        
+        /* Chart containers */
+        .chart-container {
+            height: 300px;
+            position: relative;
+        }
+        
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            border-radius: var(--border-radius);
+        }
+        
+        /* Analytics specific styles */
+        .stat-card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 1.5rem;
+        }
+        
+        .stat-info h3 {
+            font-size: 1.8rem;
+            margin: 0;
+            font-weight: bold;
+        }
+        
+        .stat-info p {
+            margin: 0;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+        
+        .trend-indicator {
+            margin-left: auto;
+            font-size: 1.2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .trend-indicator.up {
+            color: var(--success);
+        }
+        
+        .trend-indicator.down {
+            color: var(--danger);
+        }
+        
+        .trend-indicator span {
+            font-size: 0.8rem;
+        }
+        
+        .nav-pills .nav-link {
+            color: rgba(255, 255, 255, 0.7);
+            border-radius: var(--border-radius);
+            padding: 8px 15px;
+            margin-right: 10px;
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+        
+        .nav-pills .nav-link.active {
+            background-color: var(--accent);
+            color: white;
+        }
+        
+        .time-filter {
+            background-color: rgba(0, 0, 0, 0.1);
+            border-radius: var(--border-radius);
+            display: inline-flex;
+            margin-bottom: 20px;
+        }
+        
+        .time-filter a {
+            color: rgba(255, 255, 255, 0.7);
+            padding: 8px 15px;
+            text-decoration: none;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .time-filter a:last-child {
+            border-right: none;
+        }
+        
+        .time-filter a.active {
+            background-color: var(--accent);
+            color: white;
+        }
+        
+        /* Media queries */
+        @media (max-width: 991.98px) {
+            .sidebar {
+                width: 80px;
+            }
+            
+            .sidebar-brand span, .sidebar-link span, .menu-header {
+                display: none;
+            }
+            
+            .sidebar-brand i, .sidebar-link i {
+                margin-right: 0;
+                font-size: 1.3rem;
+            }
+            
+            .sidebar-link {
+                justify-content: center;
+                padding: 15px;
+            }
+            
+            .main-content {
+                margin-left: 80px;
+            }
+        }
+        
+        @media (max-width: 767.98px) {
+            .main-content {
+                margin-left: 0;
+                padding: 15px;
+            }
+            
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .mobile-menu-toggle {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar - Same as dashboard -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <a href="/" class="sidebar-brand">
+                <i class="fas fa-shield-alt"></i>
+                <span>LOLBins IDS</span>
+            </a>
+        </div>
+        <div class="sidebar-menu">
+            <div class="menu-header">Monitoring</div>
+            <a href="/" class="sidebar-link">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="/alerts" class="sidebar-link">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>Alerts</span>
+            </a>
+            <a href="/analytics" class="sidebar-link active">
+                <i class="fas fa-chart-line"></i>
+                <span>Analytics</span>
+            </a>
+            
+            <div class="menu-header">Management</div>
+            <a href="/settings" class="sidebar-link">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </a>
+            <a href="/reports" class="sidebar-link">
+                <i class="fas fa-file-alt"></i>
+                <span>Reports</span>
+            </a>
+            <a href="/rules" class="sidebar-link">
+                <i class="fas fa-list-check"></i>
+                <span>Rules</span>
+            </a>
+            <a href="/whitelist" class="sidebar-link">
+                <i class="fas fa-shield-halved"></i>
+                <span>Whitelist</span>
+            </a>
+            
+            <div class="menu-header">System</div>
+            <a href="/about" class="sidebar-link">
+                <i class="fas fa-info-circle"></i>
+                <span>About</span>
+            </a>
+            <a href="/logout" class="sidebar-link">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="main-content">
+        <!-- Header -->
+        <div class="header">
+            <h1>Analytics & Trends</h1>
+            <div class="header-actions">
+                <div class="time-filter">
+                    <a href="#" class="active" data-timeframe="week">Week</a>
+                    <a href="#" data-timeframe="month">Month</a>
+                    <a href="#" data-timeframe="quarter">Quarter</a>
+                    <a href="#" data-timeframe="year">Year</a>
+                </div>
+                <button class="btn btn-outline-light ms-2" id="exportBtn">
+                    <i class="fas fa-download me-1"></i> Export
+                </button>
+            </div>
+        </div>
+
+        <!-- Key metrics -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon" style="color: var(--warning);">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>157</h3>
+                        <p>Total Alerts</p>
+                    </div>
+                    <div class="trend-indicator up">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>+12%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon" style="color: var(--danger);">
+                        <i class="fas fa-radiation"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>23</h3>
+                        <p>Critical Alerts</p>
+                    </div>
+                    <div class="trend-indicator up">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>+8%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon" style="color: var(--info);">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>78%</h3>
+                        <p>Detection Rate</p>
+                    </div>
+                    <div class="trend-indicator up">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>+3%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon" style="color: var(--success);">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>94.2%</h3>
+                        <p>System Uptime</p>
+                    </div>
+                    <div class="trend-indicator down">
+                        <i class="fas fa-arrow-down"></i>
+                        <span>-1.2%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics tabs -->
+        <ul class="nav nav-pills mb-4" id="analyticsTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="alerts-tab" data-bs-toggle="pill" data-bs-target="#alerts-content" type="button" role="tab" aria-controls="alerts-content" aria-selected="true">Alerts Analysis</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="lolbins-tab" data-bs-toggle="pill" data-bs-target="#lolbins-content" type="button" role="tab" aria-controls="lolbins-content" aria-selected="false">LOLBins Distribution</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="performance-tab" data-bs-toggle="pill" data-bs-target="#performance-content" type="button" role="tab" aria-controls="performance-content" aria-selected="false">System Performance</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="users-tab" data-bs-toggle="pill" data-bs-target="#users-content" type="button" role="tab" aria-controls="users-content" aria-selected="false">User Activity</button>
+            </li>
+        </ul>
+        
+        <!-- Tab content -->
+        <div class="tab-content" id="analyticsTabContent">
+            <!-- Alerts Analysis Tab -->
+            <div class="tab-pane fade show active" id="alerts-content" role="tabpanel" aria-labelledby="alerts-tab">
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="card">
+                            <div class="card-header">
+                                Alerts Over Time
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="alertsOverTimeChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header">
+                                Alerts by Severity
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="alertsBySeverityChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                Top Alert Rules
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="topRulesChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                Alert Time Distribution
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="alertTimeDistributionChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- LOLBins Distribution Tab -->
+            <div class="tab-pane fade" id="lolbins-content" role="tabpanel" aria-labelledby="lolbins-tab">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                Top LOLBins by Alert Count
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="topLolbinsChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                LOLBins by Severity
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="lolbinsBySeverityChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card mt-4">
+                    <div class="card-header">
+                        LOLBins Activity Timeline
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="lolbinsTimelineChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- System Performance Tab -->
+            <div class="tab-pane fade" id="performance-content" role="tabpanel" aria-labelledby="performance-tab">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                CPU Usage
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="cpuUsageChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                Memory Usage
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="memoryUsageChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                Disk I/O
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="diskIOChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                Network Traffic
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="networkTrafficChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- User Activity Tab -->
+            <div class="tab-pane fade" id="users-content" role="tabpanel" aria-labelledby="users-tab">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                Alerts by User
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="alertsByUserChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                User Login Activity
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="userLoginChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card mt-4">
+                    <div class="card-header">
+                        User Activity Timeline
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="userActivityTimelineChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        // Initialize all charts when the document is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCharts();
+            
+            // Handle time filter clicks
+            document.querySelectorAll('.time-filter a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    // Remove active class from all links
+                    document.querySelectorAll('.time-filter a').forEach(l => l.classList.remove('active'));
+                    // Add active class to clicked link
+                    this.classList.add('active');
+                    // Update charts based on selected timeframe
+                    updateChartsForTimeframe(this.dataset.timeframe);
+                });
+            });
+            
+            // Handle export button
+            document.getElementById('exportBtn').addEventListener('click', function() {
+                alert('Exporting analytics data as CSV...');
+                // In a real application, this would trigger a download
+            });
+        });
+        
+        function initializeCharts() {
+            // Set Chart.js defaults
+            Chart.defaults.color = "#ecf0f1";
+            Chart.defaults.font.family = "'Segoe UI', 'Roboto', sans-serif";
+            
+            // Alerts Over Time Chart
+            const alertsTimeCtx = document.getElementById('alertsOverTimeChart').getContext('2d');
+            new Chart(alertsTimeCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                    datasets: [{
+                        label: 'All Alerts',
+                        data: [42, 38, 35, 42],
+                        borderColor: '#3498db',
+                        backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true
+                    }, {
+                        label: 'High Severity',
+                        data: [8, 5, 4, 6],
+                        borderColor: '#e74c3c',
+                        backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
+                            borderColor: 'rgba(255, 255, 255, 0.1)',
+                            borderWidth: 1
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Alerts by Severity Chart
+            const severityCtx = document.getElementById('alertsBySeverityChart').getContext('2d');
+            new Chart(severityCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Low', 'Medium-Low', 'Medium', 'Medium-High', 'High'],
+                    datasets: [{
+                        data: [15, 25, 45, 48, 24],
+                        backgroundColor: [
+                            '#3498db', // Low
+                            '#2ecc71', // Medium-Low
+                            '#f39c12', // Medium
+                            '#e67e22', // Medium-High
+                            '#e74c3c'  // High
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#2c3e50'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        }
+                    }
+                }
+            });
+            
+            // Top Alert Rules Chart
+            const topRulesCtx = document.getElementById('topRulesChart').getContext('2d');
+            new Chart(topRulesCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['PowerShell Encoded', 'CertUtil Download', 'Regsvr32 Bypass', 'MSHTA Execution', 'WMIC Process'],
+                    datasets: [{
+                        label: 'Alert Count',
+                        data: [42, 36, 28, 26, 25],
+                        backgroundColor: '#3498db',
+                        borderWidth: 0,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            }
+                        },
+                        y: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Alert Time Distribution Chart
+            const timeDistCtx = document.getElementById('alertTimeDistributionChart').getContext('2d');
+            new Chart(timeDistCtx, {
+                type: 'line',
+                data: {
+                    labels: ['00:00', '03:00', '06:00', '09:00', '12:00', '15:00', '18:00', '21:00'],
+                    datasets: [{
+                        label: 'Alerts by Hour',
+                        data: [8, 4, 2, 12, 18, 35, 28, 15],
+                        borderColor: '#f39c12',
+                        backgroundColor: 'rgba(243, 156, 18, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#f39c12'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Initialize all other charts with sample data
+            initializeLolbinsCharts();
+            initializePerformanceCharts();
+            initializeUserCharts();
+        }
+        
+        function initializeLolbinsCharts() {
+            // Top LOLBins Chart
+            const topLolbinsCtx = document.getElementById('topLolbinsChart').getContext('2d');
+            new Chart(topLolbinsCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['powershell.exe', 'certutil.exe', 'regsvr32.exe', 'mshta.exe', 'wmic.exe'],
+                    datasets: [{
+                        label: 'Alert Count',
+                        data: [48, 36, 28, 26, 19],
+                        backgroundColor: '#3498db',
+                        borderWidth: 0,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // LOLBins by Severity Chart
+            const lolbinSeverityCtx = document.getElementById('lolbinsBySeverityChart').getContext('2d');
+            new Chart(lolbinSeverityCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['PowerShell', 'CertUtil', 'Regsvr32', 'MSHTA', 'WMIC'],
+                    datasets: [{
+                        label: 'Avg. Severity',
+                        data: [4.2, 3.8, 4.5, 4.0, 3.2],
+                        borderColor: '#f39c12',
+                        backgroundColor: 'rgba(243, 156, 18, 0.2)',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#f39c12'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            },
+                            pointLabels: {
+                                color: 'rgba(255, 255, 255, 0.7)'
+                            },
+                            ticks: {
+                                backdropColor: 'transparent',
+                                color: 'rgba(255, 255, 255, 0.7)'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // LOLBins Timeline Chart
+            const lolbinsTimelineCtx = document.getElementById('lolbinsTimelineChart').getContext('2d');
+            new Chart(lolbinsTimelineCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                    datasets: [
+                        {
+                            label: 'PowerShell',
+                            data: [15, 12, 8, 13],
+                            borderColor: '#e74c3c',
+                            tension: 0.3,
+                            borderWidth: 2,
+                            fill: false
+                        },
+                        {
+                            label: 'CertUtil',
+                            data: [8, 10, 7, 11],
+                            borderColor: '#3498db',
+                            tension: 0.3,
+                            borderWidth: 2,
+                            fill: false
+                        },
+                        {
+                            label: 'Regsvr32',
+                            data: [6, 7, 9, 6],
+                            borderColor: '#2ecc71',
+                            tension: 0.3,
+                            borderWidth: 2,
+                            fill: false
+                        },
+                        {
+                            label: 'MSHTA',
+                            data: [7, 5, 8, 6],
+                            borderColor: '#f39c12',
+                            tension: 0.3,
+                            borderWidth: 2,
+                            fill: false
+                        },
+                        {
+                            label: 'WMIC',
+                            data: [6, 4, 3, 6],
+                            borderColor: '#9b59b6',
+                            tension: 0.3,
+                            borderWidth: 2,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function initializePerformanceCharts() {
+            // CPU Usage Chart
+            const cpuCtx = document.getElementById('cpuUsageChart').getContext('2d');
+            new Chart(cpuCtx, {
+                type: 'line',
+                data: {
+                    labels: generateTimeLabels(24),
+                    datasets: [{
+                        label: 'CPU Usage %',
+                        data: generateRandomData(24, 10, 40),
+                        borderColor: '#3498db',
+                        backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Memory Usage Chart
+            const memoryCtx = document.getElementById('memoryUsageChart').getContext('2d');
+            new Chart(memoryCtx, {
+                type: 'line',
+                data: {
+                    labels: generateTimeLabels(24),
+                    datasets: [{
+                        label: 'Memory Usage %',
+                        data: generateRandomData(24, 30, 70),
+                        borderColor: '#e74c3c',
+                        backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Disk I/O Chart
+            const diskCtx = document.getElementById('diskIOChart').getContext('2d');
+            new Chart(diskCtx, {
+                type: 'bar',
+                data: {
+                    labels: generateTimeLabels(12),
+                    datasets: [{
+                        label: 'Read MB/s',
+                        data: generateRandomData(12, 1, 20),
+                        backgroundColor: '#2ecc71',
+                        borderWidth: 0,
+                        borderRadius: 4
+                    }, {
+                        label: 'Write MB/s',
+                        data: generateRandomData(12, 1, 15),
+                        backgroundColor: '#f39c12',
+                        borderWidth: 0,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Network Traffic Chart
+            const networkCtx = document.getElementById('networkTrafficChart').getContext('2d');
+            new Chart(networkCtx, {
+                type: 'line',
+                data: {
+                    labels: generateTimeLabels(12),
+                    datasets: [{
+                        label: 'Inbound MB/s',
+                        data: generateRandomData(12, 0.1, 2.5),
+                        borderColor: '#9b59b6',
+                        backgroundColor: 'rgba(155, 89, 182, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.3
+                    }, {
+                        label: 'Outbound MB/s',
+                        data: generateRandomData(12, 0.05, 1.2),
+                        borderColor: '#16a085',
+                        backgroundColor: 'rgba(22, 160, 133, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function initializeUserCharts() {
+            // Alerts by User Chart
+            const userAlertsCtx = document.getElementById('alertsByUserChart').getContext('2d');
+            new Chart(userAlertsCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['admin', 'john.doe', 'jane.smith', 'dev-user1', 'system'],
+                    datasets: [{
+                        label: 'Alert Count',
+                        data: [23, 45, 12, 38, 39],
+                        backgroundColor: '#3498db',
+                        borderWidth: 0,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // User Login Activity Chart
+            const loginCtx = document.getElementById('userLoginChart').getContext('2d');
+            new Chart(loginCtx, {
+                type: 'line',
+                data: {
+                    labels: ['00:00', '03:00', '06:00', '09:00', '12:00', '15:00', '18:00', '21:00'],
+                    datasets: [{
+                        label: 'Login Count',
+                        data: [2, 1, 5, 25, 18, 22, 15, 8],
+                        borderColor: '#2ecc71',
+                        backgroundColor: 'rgba(46, 204, 113, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // User Activity Timeline Chart
+            const userTimelineCtx = document.getElementById('userActivityTimelineChart').getContext('2d');
+            new Chart(userTimelineCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [
+                        {
+                            label: 'Login Events',
+                            data: [65, 72, 78, 75, 62, 23, 18],
+                            backgroundColor: '#2ecc71'
+                        },
+                        {
+                            label: 'LOLBin Executions',
+                            data: [25, 32, 28, 35, 22, 8, 5],
+                            backgroundColor: '#e74c3c'
+                        },
+                        {
+                            label: 'File Operations',
+                            data: [45, 52, 48, 55, 42, 15, 12],
+                            backgroundColor: '#3498db'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            stacked: true
+                        },
+                        y: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            stacked: true
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Helper function to generate time labels
+        function generateTimeLabels(count) {
+            const labels = [];
+            for (let i = 0; i < count; i++) {
+                const hour = Math.floor(i * (24 / count));
+                labels.push(`${hour.toString().padStart(2, '0')}:00`);
+            }
+            return labels;
+        }
+        
+        // Helper function to generate random data
+        function generateRandomData(count, min, max) {
+            const data = [];
+            for (let i = 0; i < count; i++) {
+                data.push(Math.floor(Math.random() * (max - min + 1)) + min);
+            }
+            return data;
+        }
+        
+        // Function to update charts based on selected timeframe
+        function updateChartsForTimeframe(timeframe) {
+            // In a real application, this would fetch data for the selected timeframe
+            console.log(`Updating charts for timeframe: ${timeframe}`);
+            // For demonstration, we'll just show an alert
+            alert(`Analytics updated to show ${timeframe} data`);
+        }
+    </script>
+</body>
+</html>

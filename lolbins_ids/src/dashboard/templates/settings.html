@@ -1,0 +1,1197 @@
+<!-- templates/settings.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOLBins IDS | Settings</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Same style as the dashboard -->
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #34495e;
+            --accent: #3498db;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --success: #2ecc71;
+            --info: #3498db;
+            --light-bg: #ecf0f1;
+            --dark-bg: #1a1a1a;
+            --card-bg: #2c3e50;
+            --text-light: #ecf0f1;
+            --text-dark: #2c3e50;
+            --border-radius: 8px;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Roboto', sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--text-light);
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            background-color: var(--secondary);
+            min-height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            z-index: 1000;
+            transition: all 0.3s;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sidebar-header {
+            padding: 20px 15px;
+            background-color: var(--primary);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-brand {
+            color: var(--text-light);
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+        
+        .sidebar-brand i {
+            margin-right: 10px;
+            color: var(--accent);
+        }
+        
+        .sidebar-menu {
+            padding: 15px 0;
+        }
+        
+        .menu-header {
+            color: rgba(255, 255, 255, 0.5);
+            padding: 10px 25px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 10px;
+        }
+        
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            color: rgba(255, 255, 255, 0.7);
+            padding: 12px 25px;
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+        
+        .sidebar-link i {
+            margin-right: 10px;
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .sidebar-link.active {
+            color: var(--text-light);
+            background-color: rgba(0, 0, 0, 0.1);
+            border-left: 3px solid var(--accent);
+        }
+        
+        .sidebar-link:hover {
+            color: var(--text-light);
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Main content */
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        
+        /* Header */
+        .header {
+            background-color: var(--primary);
+            padding: 15px 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+            margin: 0;
+        }
+        
+        .header-actions {
+            display: flex;
+            align-items: center;
+        }
+        
+        .header-actions .btn {
+            margin-left: 10px;
+        }
+        
+        /* Cards */
+        .card {
+            background-color: var(--card-bg);
+            border: none;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            color: var(--text-light);
+        }
+        
+        .card-header {
+            background-color: rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px 20px;
+            font-weight: 600;
+        }
+        
+        .card-body {
+            padding: 20px;
+        }
+        
+        /* Settings specific styles */
+        .form-control, .form-select {
+            background-color: #1e2b38;
+            border-color: rgba(255, 255, 255, 0.1);
+            color: var(--text-light);
+        }
+        
+        .form-control:focus, .form-select:focus {
+            background-color: #1e2b38;
+            border-color: var(--accent);
+            color: var(--text-light);
+            box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25);
+        }
+        
+        .form-label {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .form-text {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .form-check-input {
+            background-color: #1e2b38;
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .form-check-input:checked {
+            background-color: var(--accent);
+            border-color: var(--accent);
+        }
+        
+        .form-switch .form-check-input {
+            width: 2.5em;
+            height: 1.25em;
+        }
+        
+        .settings-category {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 10px;
+        }
+        
+        .nav-pills .nav-link {
+            color: rgba(255, 255, 255, 0.7);
+            border-radius: var(--border-radius);
+            padding: 10px 15px;
+            margin-bottom: 5px;
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+        
+        .nav-pills .nav-link.active {
+            background-color: var(--accent);
+            color: white;
+        }
+        
+        .nav-pills .nav-link i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        /* Media queries */
+        @media (max-width: 991.98px) {
+            .sidebar {
+                width: 80px;
+            }
+            
+            .sidebar-brand span, .sidebar-link span, .menu-header {
+                display: none;
+            }
+            
+            .sidebar-brand i, .sidebar-link i {
+                margin-right: 0;
+                font-size: 1.3rem;
+            }
+            
+            .sidebar-link {
+                justify-content: center;
+                padding: 15px;
+            }
+            
+            .main-content {
+                margin-left: 80px;
+            }
+        }
+        
+        @media (max-width: 767.98px) {
+            .main-content {
+                margin-left: 0;
+                padding: 15px;
+            }
+            
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .mobile-menu-toggle {
+                display: block;
+            }
+            
+            .settings-nav {
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar - Same as dashboard -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <a href="/" class="sidebar-brand">
+                <i class="fas fa-shield-alt"></i>
+                <span>LOLBins IDS</span>
+            </a>
+        </div>
+        <div class="sidebar-menu">
+            <div class="menu-header">Monitoring</div>
+            <a href="/" class="sidebar-link">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="/alerts" class="sidebar-link">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>Alerts</span>
+            </a>
+            <a href="/analytics" class="sidebar-link">
+                <i class="fas fa-chart-line"></i>
+                <span>Analytics</span>
+            </a>
+            
+            <div class="menu-header">Management</div>
+            <a href="/settings" class="sidebar-link active">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </a>
+            <a href="/reports" class="sidebar-link">
+                <i class="fas fa-file-alt"></i>
+                <span>Reports</span>
+            </a>
+            <a href="/rules" class="sidebar-link">
+                <i class="fas fa-list-check"></i>
+                <span>Rules</span>
+            </a>
+            <a href="/whitelist" class="sidebar-link">
+                <i class="fas fa-shield-halved"></i>
+                <span>Whitelist</span>
+            </a>
+            
+            <div class="menu-header">System</div>
+            <a href="/about" class="sidebar-link">
+                <i class="fas fa-info-circle"></i>
+                <span>About</span>
+            </a>
+            <a href="/logout" class="sidebar-link">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="main-content">
+        <!-- Header -->
+        <div class="header">
+            <h1>System Settings</h1>
+            <div class="header-actions">
+                <button class="btn btn-primary" id="saveSettingsBtn">
+                    <i class="fas fa-save me-1"></i> Save Settings
+                </button>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Settings navigation -->
+            <div class="col-md-3 settings-nav">
+                <div class="card">
+                    <div class="card-body p-0">
+                        <div class="list-group list-group-flush">
+                            <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                                <button class="nav-link active" id="v-pills-general-tab" data-bs-toggle="pill" data-bs-target="#v-pills-general" type="button" role="tab" aria-controls="v-pills-general" aria-selected="true">
+                                    <i class="fas fa-sliders-h"></i> General
+                                </button>
+                                <button class="nav-link" id="v-pills-monitoring-tab" data-bs-toggle="pill" data-bs-target="#v-pills-monitoring" type="button" role="tab" aria-controls="v-pills-monitoring" aria-selected="false">
+                                    <i class="fas fa-desktop"></i> Monitoring
+                                </button>
+                                <button class="nav-link" id="v-pills-alerts-tab" data-bs-toggle="pill" data-bs-target="#v-pills-alerts" type="button" role="tab" aria-controls="v-pills-alerts" aria-selected="false">
+                                    <i class="fas fa-bell"></i> Alerts
+                                </button>
+                                <button class="nav-link" id="v-pills-notifications-tab" data-bs-toggle="pill" data-bs-target="#v-pills-notifications" type="button" role="tab" aria-controls="v-pills-notifications" aria-selected="false">
+                                    <i class="fas fa-envelope"></i> Notifications
+                                </button>
+                                <button class="nav-link" id="v-pills-users-tab" data-bs-toggle="pill" data-bs-target="#v-pills-users" type="button" role="tab" aria-controls="v-pills-users" aria-selected="false">
+                                    <i class="fas fa-users"></i> Users
+                                </button>
+                                <button class="nav-link" id="v-pills-logs-tab" data-bs-toggle="pill" data-bs-target="#v-pills-logs" type="button" role="tab" aria-controls="v-pills-logs" aria-selected="false">
+                                    <i class="fas fa-history"></i> Logs
+                                </button>
+                                <button class="nav-link" id="v-pills-advanced-tab" data-bs-toggle="pill" data-bs-target="#v-pills-advanced" type="button" role="tab" aria-controls="v-pills-advanced" aria-selected="false">
+                                    <i class="fas fa-tools"></i> Advanced
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <div class="d-grid">
+                            <button class="btn btn-outline-danger" id="resetSettingsBtn">
+                                <i class="fas fa-undo me-1"></i> Reset to Defaults
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Settings content -->
+            <div class="col-md-9">
+                <div class="tab-content" id="v-pills-tabContent">
+                    <!-- General Settings -->
+                    <div class="tab-pane fade show active" id="v-pills-general" role="tabpanel" aria-labelledby="v-pills-general-tab">
+                        <div class="card">
+                            <div class="card-header">
+                                General Settings
+                            </div>
+                            <div class="card-body">
+                                <div class="settings-category">System</div>
+                                <div class="mb-3">
+                                    <label for="systemName" class="form-label">System Name</label>
+                                    <input type="text" class="form-control" id="systemName" value="LOLBins IDS">
+                                    <div class="form-text">Name displayed in reports and notifications</div>
+                                </div>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="dateFormat" class="form-label">Date Format</label>
+                                        <select class="form-select" id="dateFormat">
+                                            <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                                            <option value="DD/MM/YYYY" selected>DD/MM/YYYY</option>
+                                            <option value="YYYY-MM-DD">YYYY-MM-DD</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="timeFormat" class="form-label">Time Format</label>
+                                        <select class="form-select" id="timeFormat">
+                                            <option value="12h">12-hour (AM/PM)</option>
+                                            <option value="24h" selected>24-hour</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="settings-category mt-4">Interface</div>
+                                <div class="mb-3">
+                                    <label for="theme" class="form-label">Theme</label>
+                                    <select class="form-select" id="theme">
+                                        <option value="dark" selected>Dark</option>
+                                        <option value="light">Light</option>
+                                        <option value="system">System Default</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="defaultView" class="form-label">Default Dashboard View</label>
+                                    <select class="form-select" id="defaultView">
+                                        <option value="overview" selected>Overview</option>
+                                        <option value="alerts">Recent Alerts</option>
+                                        <option value="performance">System Performance</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="enableAnimations" checked>
+                                        <label class="form-check-label" for="enableAnimations">Enable Animations</label>
+                                    </div>
+                                    <div class="form-text">Enable or disable UI animations</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Monitoring Settings -->
+                    <div class="tab-pane fade" id="v-pills-monitoring" role="tabpanel" aria-labelledby="v-pills-monitoring-tab">
+                        <div class="card">
+                            <div class="card-header">
+                                Monitoring Settings
+                            </div>
+                            <div class="card-body">
+                                <div class="settings-category">Process Monitoring</div>
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="enableProcessMonitoring" checked>
+                                        <label class="form-check-label" for="enableProcessMonitoring">Enable Process Monitoring</label>
+                                    </div>
+                                    <div class="form-text">Monitor system processes for LOLBins activity</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="monitoringInterval" class="form-label">Monitoring Interval (seconds)</label>
+                                    <input type="number" class="form-control" id="monitoringInterval" value="5" min="1" max="60">
+                                    <div class="form-text">How often to scan for processes (lower values increase detection speed but use more resources)</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="maxProcessHistory" class="form-label">Process History Size</label>
+                                    <input type="number" class="form-control" id="maxProcessHistory" value="100" min="10" max="1000">
+                                    <div class="form-text">Maximum number of processes to keep in history for context analysis</div>
+                                </div>
+                                
+                                <div class="settings-category mt-4">Context Awareness</div>
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="enableContextAwareness" checked>
+                                        <label class="form-check-label" for="enableContextAwareness">Enable Context Awareness</label>
+                                    </div>
+                                    <div class="form-text">Use process context for more accurate detection</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="contextTimeWindow" class="form-label">Context Time Window (minutes)</label>
+                                    <input type="number" class="form-control" id="contextTimeWindow" value="30" min="1" max="120">
+                                    <div class="form-text">Time window for process context analysis</div>
+                                </div>
+                                
+                                <div class="settings-category mt-4">Resource Limits</div>
+                                <div class="mb-3">
+                                    <label for="maxCpuUsage" class="form-label">Maximum CPU Usage</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" id="maxCpuUsage" value="25" min="5" max="90">
+                                        <span class="input-group-text">%</span>
+                                    </div>
+                                    <div class="form-text">Maximum CPU usage allowed for monitoring</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="maxMemoryUsage" class="form-label">Maximum Memory Usage</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" id="maxMemoryUsage" value="512" min="128" max="2048">
+                                        <span class="input-group-text">MB</span>
+                                    </div>
+                                    <div class="form-text">Maximum memory usage allowed</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Alert Settings -->
+                    <div class="tab-pane fade" id="v-pills-alerts" role="tabpanel" aria-labelledby="v-pills-alerts-tab">
+                        <div class="card">
+                            <div class="card-header">
+                                Alert Settings
+                            </div>
+                            <div class="card-body">
+                                <div class="settings-category">Alert Behavior</div>
+                                <div class="mb-3">
+                                    <label for="minAlertSeverity" class="form-label">Minimum Alert Severity</label>
+                                    <select class="form-select" id="minAlertSeverity">
+                                        <option value="1">Low (1)</option>
+                                        <option value="2">Medium-Low (2)</option>
+                                        <option value="3" selected>Medium (3)</option>
+                                        <option value="4">Medium-High (4)</option>
+                                        <option value="5">High (5)</option>
+                                    </select>
+                                    <div class="form-text">Only generate alerts for this severity and higher</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="alertRetentionPeriod" class="form-label">Alert Retention Period</label>
+                                    <select class="form-select" id="alertRetentionPeriod">
+                                        <option value="7">1 Week</option>
+                                        <option value="30" selected>1 Month</option>
+                                        <option value="90">3 Months</option>
+                                        <option value="180">6 Months</option>
+                                        <option value="365">1 Year</option>
+                                    </select>
+                                    <div class="form-text">How long to keep alerts in the database</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="enableAlertDeduplication" checked>
+                                        <label class="form-check-label" for="enableAlertDeduplication">Enable Alert Deduplication</label>
+                                    </div>
+                                    <div class="form-text">Combine similar alerts to reduce noise</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="deduplicationWindow" class="form-label">Deduplication Window (minutes)</label>
+                                    <input type="number" class="form-control" id="deduplicationWindow" value="15" min="1" max="120">
+                                    <div class="form-text">Time window for alert deduplication</div>
+                                </div>
+                                
+                                <div class="settings-category mt-4">False Positive Handling</div>
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="enableLearning" checked>
+                                        <label class="form-check-label" for="enableLearning">Enable Learning Mode</label>
+                                    </div>
+                                    <div class="form-text">Learn from user feedback to reduce false positives</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="autoWhitelist" checked>
+                                        <label class="form-check-label" for="autoWhitelist">Auto-Whitelist False Positives</label>
+                                    </div>
+                                    <div class="form-text">Automatically add confirmed false positives to whitelist</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Notification Settings -->
+                    <div class="tab-pane fade" id="v-pills-notifications" role="tabpanel" aria-labelledby="v-pills-notifications-tab">
+                        <div class="card">
+                            <div class="card-header">
+                                Notification Settings
+                            </div>
+                            <div class="card-body">
+                                <div class="settings-category">Email Notifications</div>
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="enableEmailNotifications" checked>
+                                        <label class="form-check-label" for="enableEmailNotifications">Enable Email Notifications</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="smtpServer" class="form-label">SMTP Server</label>
+                                        <input type="text" class="form-control" id="smtpServer" value="smtp.company.com">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="smtpPort" class="form-label">SMTP Port</label>
+                                        <input type="number" class="form-control" id="smtpPort" value="587">
+                                    </div>
+                                </div>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="smtpUsername" class="form-label">SMTP Username</label>
+                                        <input type="text" class="form-control" id="smtpUsername" value="alerts@company.com">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="smtpPassword" class="form-label">SMTP Password</label>
+                                        <input type="password" class="form-control" id="smtpPassword" value="********">
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="notificationRecipients" class="form-label">Recipients</label>
+                                    <textarea class="form-control" id="notificationRecipients" rows="2">security@company.com, admin@company.com</textarea>
+                                    <div class="form-text">Comma-separated list of email recipients</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="enableSsl" checked>
+                                        <label class="form-check-label" for="enableSsl">Enable SSL/TLS</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="emailNotificationSeverity" class="form-label">Notification Severity Threshold</label>
+                                    <select class="form-select" id="emailNotificationSeverity">
+                                        <option value="1">Low (1)</option>
+                                        <option value="2">Medium-Low (2)</option>
+                                        <option value="3">Medium (3)</option>
+                                        <option value="4" selected>Medium-High (4)</option>
+                                        <option value="5">High (5)</option>
+                                    </select>
+                                    <div class="form-text">Only send notifications for this severity and higher</div>
+                                </div>
+                                
+                                <div class="settings-category mt-4">Other Notifications</div>
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="enableWebhooks">
+                                        <label class="form-check-label" for="enableWebhooks">Enable Webhook Notifications</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="webhookUrl" class="form-label">Webhook URL</label>
+                                    <input type="text" class="form-control" id="webhookUrl" placeholder="https://example.com/webhook">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="enableSlack">
+                                        <label class="form-check-label" for="enableSlack">Enable Slack Notifications</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="slackWebhook" class="form-label">Slack Webhook URL</label>
+                                    <input type="text" class="form-control" id="slackWebhook" placeholder="https://hooks.slack.com/services/...">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- User Settings -->
+                    <div class="tab-pane fade" id="v-pills-users" role="tabpanel" aria-labelledby="v-pills-users-tab">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <span>User Management</span>
+                                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                                    <i class="fas fa-user-plus me-1"></i> Add User
+                                </button>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-dark table-hover mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Username</th>
+                                                <th>Email</th>
+                                                <th>Role</th>
+                                                <th>Status</th>
+                                                <th>Last Login</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>admin</td>
+                                                <td>admin@company.com</td>
+                                                <td><span class="badge bg-danger">Administrator</span></td>
+                                                <td><span class="badge bg-success">Active</span></td>
+                                                <td>2025-02-25 15:30:22</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-outline-primary me-1">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-danger" disabled>
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>analyst</td>
+                                                <td>analyst@company.com</td>
+                                                <td><span class="badge bg-info">Analyst</span></td>
+                                                <td><span class="badge bg-success">Active</span></td>
+                                                <td>2025-02-24 10:15:07</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-outline-primary me-1">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-danger">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>viewer</td>
+                                                <td>viewer@company.com</td>
+                                                <td><span class="badge bg-secondary">Viewer</span></td>
+                                                <td><span class="badge bg-success">Active</span></td>
+                                                <td>2025-02-23 16:42:51</td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-outline-primary me-1">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-danger">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card mt-4">
+                            <div class="card-header">
+                                Authentication Settings
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="enableLdap">
+                                        <label class="form-check-label" for="enableLdap">Enable LDAP/Active Directory</label>
+                                    </div>
+                                    <div class="form-text">Use corporate directory for authentication</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="ldapServer" class="form-label">LDAP Server</label>
+                                    <input type="text" class="form-control" id="ldapServer" placeholder="ldap.company.com">
+                                </div>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="ldapBindDn" class="form-label">Bind DN</label>
+                                        <input type="text" class="form-control" id="ldapBindDn" placeholder="cn=admin,dc=company,dc=com">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="ldapPassword" class="form-label">Bind Password</label>
+                                        <input type="password" class="form-control" id="ldapPassword">
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="ldapUserBase" class="form-label">User Base DN</label>
+                                    <input type="text" class="form-control" id="ldapUserBase" placeholder="ou=users,dc=company,dc=com">
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="enableTwoFactor" checked>
+                                        <label class="form-check-label" for="enableTwoFactor">Enable Two-Factor Authentication</label>
+                                    </div>
+                                    <div class="form-text">Require OTP for login</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="passwordPolicy" class="form-label">Password Policy</label>
+                                    <select class="form-select" id="passwordPolicy">
+                                        <option value="basic">Basic (8+ characters)</option>
+                                        <option value="standard" selected>Standard (8+ chars, uppercase, lowercase, numbers)</option>
+                                        <option value="strong">Strong (12+ chars, uppercase, lowercase, numbers, symbols)</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="passwordExpiry" class="form-label">Password Expiry</label>
+                                    <select class="form-select" id="passwordExpiry">
+                                        <option value="30">30 Days</option>
+                                        <option value="60">60 Days</option>
+                                        <option value="90" selected>90 Days</option>
+                                        <option value="0">Never</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Log Settings -->
+                    <div class="tab-pane fade" id="v-pills-logs" role="tabpanel" aria-labelledby="v-pills-logs-tab">
+                        <div class="card">
+                            <div class="card-header">
+                                Logging Settings
+                            </div>
+                            <div class="card-body">
+                                <div class="settings-category">Log Configuration</div>
+                                <div class="mb-3">
+                                    <label for="logLevel" class="form-label">Log Level</label>
+                                    <select class="form-select" id="logLevel">
+                                        <option value="debug">Debug (Verbose)</option>
+                                        <option value="info" selected>Info</option>
+                                        <option value="warning">Warning</option>
+                                        <option value="error">Error</option>
+                                        <option value="critical">Critical</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="logPath" class="form-label">Log Directory</label>
+                                    <input type="text" class="form-control" id="logPath" value="/var/log/lolbins_ids">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="logRetention" class="form-label">Log Retention</label>
+                                    <select class="form-select" id="logRetention">
+                                        <option value="7">1 Week</option>
+                                        <option value="30" selected>1 Month</option>
+                                        <option value="90">3 Months</option>
+                                        <option value="180">6 Months</option>
+                                        <option value="365">1 Year</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="enableLogRotation" checked>
+                                        <label class="form-check-label" for="enableLogRotation">Enable Log Rotation</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="maxLogSize" class="form-label">Maximum Log Size</label>
+                                        <div class="input-group">
+                                            <input type="number" class="form-control" id="maxLogSize" value="10" min="1" max="1000">
+                                            <span class="input-group-text">MB</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="maxLogFiles" class="form-label">Maximum Log Files</label>
+                                        <input type="number" class="form-control" id="maxLogFiles" value="10" min="1" max="100">
+                                    </div>
+                                </div>
+                                
+                                <div class="settings-category mt-4">Audit Logging</div>
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="enableAuditLog" checked>
+                                        <label class="form-check-label" for="enableAuditLog">Enable Audit Logging</label>
+                                    </div>
+                                    <div class="form-text">Log all user actions for auditing purposes</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="auditLogRetention" class="form-label">Audit Log Retention</label>
+                                    <select class="form-select" id="auditLogRetention">
+                                        <option value="30">1 Month</option>
+                                        <option value="90">3 Months</option>
+                                        <option value="180">6 Months</option>
+                                        <option value="365" selected>1 Year</option>
+                                        <option value="730">2 Years</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="enableSyslog">
+                                        <label class="form-check-label" for="enableSyslog">Forward Logs to Syslog</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-md-8">
+                                        <label for="syslogServer" class="form-label">Syslog Server</label>
+                                        <input type="text" class="form-control" id="syslogServer" placeholder="syslog.company.com">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="syslogPort" class="form-label">Port</label>
+                                        <input type="number" class="form-control" id="syslogPort" value="514">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Advanced Settings -->
+                    <div class="tab-pane fade" id="v-pills-advanced" role="tabpanel" aria-labelledby="v-pills-advanced-tab">
+                        <div class="card">
+                            <div class="card-header">
+                                Advanced Settings
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-warning">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    These settings can significantly impact system performance and security. Change with caution.
+                                </div>
+                                
+                                <div class="settings-category">Database Configuration</div>
+                                <div class="mb-3">
+                                    <label for="dbType" class="form-label">Database Type</label>
+                                    <select class="form-select" id="dbType">
+                                        <option value="sqlite" selected>SQLite (Default)</option>
+                                        <option value="mysql">MySQL</option>
+                                        <option value="postgresql">PostgreSQL</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="dbHost" class="form-label">Database Host</label>
+                                    <input type="text" class="form-control" id="dbHost" placeholder="localhost">
+                                </div>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-md-8">
+                                        <label for="dbName" class="form-label">Database Name</label>
+                                        <input type="text" class="form-control" id="dbName" placeholder="lolbins_ids">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="dbPort" class="form-label">Port</label>
+                                        <input type="number" class="form-control" id="dbPort" placeholder="3306">
+                                    </div>
+                                </div>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="dbUsername" class="form-label">Username</label>
+                                        <input type="text" class="form-control" id="dbUsername" placeholder="db_user">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="dbPassword" class="form-label">Password</label>
+                                        <input type="password" class="form-control" id="dbPassword">
+                                    </div>
+                                </div>
+                                
+                                <div class="settings-category mt-4">Performance Tuning</div>
+                                <div class="mb-3">
+                                    <label for="maxThreads" class="form-label">Maximum Threads</label>
+                                    <input type="number" class="form-control" id="maxThreads" value="4" min="1" max="16">
+                                    <div class="form-text">Maximum number of threads for process monitoring</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="cacheSize" class="form-label">Cache Size</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" id="cacheSize" value="256" min="64" max="1024">
+                                        <span class="input-group-text">MB</span>
+                                    </div>
+                                    <div class="form-text">Size of in-memory cache for rule processing</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="batchSize" class="form-label">Process Batch Size</label>
+                                    <input type="number" class="form-control" id="batchSize" value="100" min="10" max="1000">
+                                    <div class="form-text">Number of processes to analyze in a single batch</div>
+                                </div>
+                                
+                                <div class="settings-category mt-4">API Configuration</div>
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="enableApi" checked>
+                                        <label class="form-check-label" for="enableApi">Enable API</label>
+                                    </div>
+                                    <div class="form-text">Enable REST API for integration with other systems</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="apiPort" class="form-label">API Port</label>
+                                    <input type="number" class="form-control" id="apiPort" value="8080" min="1024" max="65535">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="enableApiAuth" checked>
+                                        <label class="form-check-label" for="enableApiAuth">API Authentication</label>
+                                    </div>
+                                    <div class="form-text">Require authentication for API access</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="apiTokenExpiry" class="form-label">API Token Expiry</label>
+                                    <select class="form-select" id="apiTokenExpiry">
+                                        <option value="1">1 Hour</option>
+                                        <option value="8">8 Hours</option>
+                                        <option value="24" selected>24 Hours</option>
+                                        <option value="168">7 Days</option>
+                                        <option value="720">30 Days</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add User Modal -->
+    <div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addUserModalLabel">Add New User</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label for="newUsername" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="newUsername" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="newEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newRole" class="form-label">Role</label>
+                            <select class="form-select" id="newRole">
+                                <option value="admin">Administrator</option>
+                                <option value="analyst" selected>Analyst</option>
+                                <option value="viewer">Viewer</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newPassword" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="newPassword" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="confirmPassword" class="form-label">Confirm Password</label>
+                            <input type="password" class="form-control" id="confirmPassword" required>
+                        </div>
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="sendInvite" checked>
+                            <label class="form-check-label" for="sendInvite">Send welcome email</label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary">Add User</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Save settings button
+            document.getElementById('saveSettingsBtn').addEventListener('click', function() {
+                // In a real app, this would save settings to the server
+                // For the demo, we'll just show a success message
+                alert('Settings saved successfully!');
+            });
+            
+            // Reset settings button
+            document.getElementById('resetSettingsBtn').addEventListener('click', function() {
+                if (confirm('Are you sure you want to reset all settings to their default values? This cannot be undone.')) {
+                    alert('Settings have been reset to defaults.');
+                }
+            });
+            
+            // Database type change handler
+            document.getElementById('dbType').addEventListener('change', function() {
+                const dbFields = document.querySelectorAll('#dbHost, #dbName, #dbPort, #dbUsername, #dbPassword');
+                
+                if (this.value === 'sqlite') {
+                    dbFields.forEach(field => {
+                        field.disabled = true;
+                        field.value = '';
+                    });
+                } else {
+                    dbFields.forEach(field => {
+                        field.disabled = false;
+                    });
+                    
+                    // Set default ports
+                    if (this.value === 'mysql') {
+                        document.getElementById('dbPort').value = '3306';
+                    } else if (this.value === 'postgresql') {
+                        document.getElementById('dbPort').value = '5432';
+                    }
+                }
+            });
+            
+            // Initialize database fields state
+            const dbType = document.getElementById('dbType').value;
+            if (dbType === 'sqlite') {
+                const dbFields = document.querySelectorAll('#dbHost, #dbName, #dbPort, #dbUsername, #dbPassword');
+                dbFields.forEach(field => {
+                    field.disabled = true;
+                });
+            }
+            
+            // LDAP toggle handler
+            document.getElementById('enableLdap').addEventListener('change', function() {
+                const ldapFields = document.querySelectorAll('#ldapServer, #ldapBindDn, #ldapPassword, #ldapUserBase');
+                
+                ldapFields.forEach(field => {
+                    field.disabled = !this.checked;
+                });
+            });
+            
+            // Initialize LDAP fields state
+            const ldapEnabled = document.getElementById('enableLdap').checked;
+            const ldapFields = document.querySelectorAll('#ldapServer, #ldapBindDn, #ldapPassword, #ldapUserBase');
+            ldapFields.forEach(field => {
+                field.disabled = !ldapEnabled;
+            });
+            
+            // Email notifications toggle handler
+            document.getElementById('enableEmailNotifications').addEventListener('change', function() {
+                const emailFields = document.querySelectorAll('#smtpServer, #smtpPort, #smtpUsername, #smtpPassword, #notificationRecipients, #enableSsl, #emailNotificationSeverity');
+                
+                emailFields.forEach(field => {
+                    field.disabled = !this.checked;
+                });
+            });
+            
+            // Webhook toggle handler
+            document.getElementById('enableWebhooks').addEventListener('change', function() {
+                document.getElementById('webhookUrl').disabled = !this.checked;
+            });
+            
+            // Slack toggle handler
+            document.getElementById('enableSlack').addEventListener('change', function() {
+                document.getElementById('slackWebhook').disabled = !this.checked;
+            });
+            
+            // Syslog toggle handler
+            document.getElementById('enableSyslog').addEventListener('change', function() {
+                const syslogFields = document.querySelectorAll('#syslogServer, #syslogPort');
+                
+                syslogFields.forEach(field => {
+                    field.disabled = !this.checked;
+                });
+            });
+            
+            // API toggle handler
+            document.getElementById('enableApi').addEventListener('change', function() {
+                const apiFields = document.querySelectorAll('#apiPort, #enableApiAuth, #apiTokenExpiry');
+                
+                apiFields.forEach(field => {
+                    field.disabled = !this.checked;
+                });
+            });
+            
+            // Initialize fields based on toggle states
+            document.getElementById('webhookUrl').disabled = !document.getElementById('enableWebhooks').checked;
+            document.getElementById('slackWebhook').disabled = !document.getElementById('enableSlack').checked;
+            
+            const syslogFields = document.querySelectorAll('#syslogServer, #syslogPort');
+            syslogFields.forEach(field => {
+                field.disabled = !document.getElementById('enableSyslog').checked;
+            });
+            
+            // Add user modal
+            const addUserModal = document.getElementById('addUserModal');
+            addUserModal.addEventListener('shown.bs.modal', function() {
+                document.getElementById('newUsername').focus();
+            });
+            
+            // Password confirmation check
+            document.getElementById('confirmPassword').addEventListener('input', function() {
+                const password = document.getElementById('newPassword').value;
+                if (this.value !== password) {
+                    this.setCustomValidity('Passwords do not match');
+                } else {
+                    this.setCustomValidity('');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
