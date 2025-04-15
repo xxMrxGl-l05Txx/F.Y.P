@@ -1,0 +1,415 @@
+<!-- templates/reports.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOLBins IDS | Reports</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Use the same style as your dashboard -->
+    <link rel="stylesheet" href="../static/css/dashboard.css">
+</head>
+<body>
+    <!-- Sidebar - Same as dashboard -->
+    <div class="sidebar">
+        <!-- Same sidebar content as in dashboard.html -->
+        <div class="sidebar-header">
+            <a href="/" class="sidebar-brand">
+                <i class="fas fa-shield-alt"></i>
+                <span>LOLBins IDS</span>
+            </a>
+        </div>
+        <div class="sidebar-menu">
+            <div class="menu-header">Monitoring</div>
+            <a href="/" class="sidebar-link">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="/alerts" class="sidebar-link">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>Alerts</span>
+            </a>
+            <a href="/analytics" class="sidebar-link">
+                <i class="fas fa-chart-line"></i>
+                <span>Analytics</span>
+            </a>
+            
+            <div class="menu-header">Management</div>
+            <a href="/settings" class="sidebar-link">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </a>
+            <a href="/reports" class="sidebar-link active">
+                <i class="fas fa-file-alt"></i>
+                <span>Reports</span>
+            </a>
+            <a href="/rules" class="sidebar-link">
+                <i class="fas fa-list-check"></i>
+                <span>Rules</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="main-content">
+        <!-- Header -->
+        <div class="header">
+            <h1>Security Reports</h1>
+            <div class="header-actions">
+                <button class="btn btn-primary" id="generateReportBtn">
+                    <i class="fas fa-file-export me-1"></i> Generate New Report
+                </button>
+            </div>
+        </div>
+
+        <!-- Report filters -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label for="reportType" class="form-label">Report Type</label>
+                        <select id="reportType" class="form-select">
+                            <option value="summary">Executive Summary</option>
+                            <option value="detailed">Detailed Technical Report</option>
+                            <option value="compliance">Compliance Report</option>
+                            <option value="trend">Trend Analysis</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="timeRange" class="form-label">Time Range</label>
+                        <select id="timeRange" class="form-select">
+                            <option value="day">Last 24 Hours</option>
+                            <option value="week" selected>Last 7 Days</option>
+                            <option value="month">Last 30 Days</option>
+                            <option value="custom">Custom Range</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="formatType" class="form-label">Format</label>
+                        <select id="formatType" class="form-select">
+                            <option value="pdf">PDF</option>
+                            <option value="html">HTML</option>
+                            <option value="csv">CSV</option>
+                            <option value="json">JSON</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button class="btn btn-outline-primary w-100" id="applyFiltersBtn">
+                            Apply Filters
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Saved Reports -->
+        <div class="card">
+            <div class="card-header">
+                Saved Reports
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>Report Name</th>
+                                <th>Date Generated</th>
+                                <th>Type</th>
+                                <th>Time Period</th>
+                                <th>Format</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reportsList">
+                            <tr>
+                                <td>Monthly_Security_Report_March_2025</td>
+                                <td>2025-03-01 09:15:22</td>
+                                <td>Executive Summary</td>
+                                <td>March 2025</td>
+                                <td><span class="badge bg-danger">PDF</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary me-1">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Weekly_LOLBins_Analysis_Feb25</td>
+                                <td>2025-02-25 14:30:10</td>
+                                <td>Detailed Technical Report</td>
+                                <td>Feb 19-25, 2025</td>
+                                <td><span class="badge bg-info">HTML</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary me-1">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Attack_Detection_Summary_Feb20</td>
+                                <td>2025-02-20 11:42:15</td>
+                                <td>Trend Analysis</td>
+                                <td>Jan-Feb 2025</td>
+                                <td><span class="badge bg-warning">CSV</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary me-1">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Report Templates -->
+        <div class="card mt-4">
+            <div class="card-header">
+                Report Templates
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <div class="card bg-dark">
+                            <div class="card-body text-center p-4">
+                                <i class="fas fa-file-alt fa-3x mb-3 text-primary"></i>
+                                <h5>Executive Summary</h5>
+                                <p class="small text-muted">High-level overview of security events</p>
+                                <button class="btn btn-sm btn-outline-primary mt-2">
+                                    Use Template
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card bg-dark">
+                            <div class="card-body text-center p-4">
+                                <i class="fas fa-file-code fa-3x mb-3 text-info"></i>
+                                <h5>Technical Detail</h5>
+                                <p class="small text-muted">Comprehensive technical analysis</p>
+                                <button class="btn btn-sm btn-outline-primary mt-2">
+                                    Use Template
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card bg-dark">
+                            <div class="card-body text-center p-4">
+                                <i class="fas fa-chart-line fa-3x mb-3 text-success"></i>
+                                <h5>Trend Analysis</h5>
+                                <p class="small text-muted">Statistical trends and patterns</p>
+                                <button class="btn btn-sm btn-outline-primary mt-2">
+                                    Use Template
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card bg-dark">
+                            <div class="card-body text-center p-4">
+                                <i class="fas fa-clipboard-check fa-3x mb-3 text-warning"></i>
+                                <h5>Compliance</h5>
+                                <p class="small text-muted">Regulatory compliance overview</p>
+                                <button class="btn btn-sm btn-outline-primary mt-2">
+                                    Use Template
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generate Report Modal -->
+    <div class="modal fade" id="generateReportModal" tabindex="-1" aria-labelledby="generateReportModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="generateReportModalLabel">Generate New Report</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="mb-3">
+                            <label for="reportName" class="form-label">Report Name</label>
+                            <input type="text" class="form-control" id="reportName" placeholder="Enter report name">
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="modalReportType" class="form-label">Report Type</label>
+                                <select id="modalReportType" class="form-select">
+                                    <option value="summary">Executive Summary</option>
+                                    <option value="detailed">Detailed Technical Report</option>
+                                    <option value="compliance">Compliance Report</option>
+                                    <option value="trend">Trend Analysis</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="modalFormatType" class="form-label">Format</label>
+                                <select id="modalFormatType" class="form-select">
+                                    <option value="pdf">PDF</option>
+                                    <option value="html">HTML</option>
+                                    <option value="csv">CSV</option>
+                                    <option value="json">JSON</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="startDate" class="form-label">Start Date</label>
+                                <input type="date" class="form-control" id="startDate">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="endDate" class="form-label">End Date</label>
+                                <input type="date" class="form-control" id="endDate">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Include Sections</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="includeSummary" checked>
+                                <label class="form-check-label" for="includeSummary">
+                                    Executive Summary
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="includeAlerts" checked>
+                                <label class="form-check-label" for="includeAlerts">
+                                    Alert Details
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="includeCharts" checked>
+                                <label class="form-check-label" for="includeCharts">
+                                    Charts and Visualizations
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="includeRecommendations">
+                                <label class="form-check-label" for="includeRecommendations">
+                                    Recommendations
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="createReportBtn">Generate Report</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Generate report button
+            document.getElementById('generateReportBtn').addEventListener('click', function() {
+                const modal = new bootstrap.Modal(document.getElementById('generateReportModal'));
+                modal.show();
+            });
+            
+            // Create report button
+            document.getElementById('createReportBtn').addEventListener('click', function() {
+                // Simulate report generation
+                alert('Report generation started. This may take a few moments.');
+                
+                // In a real app, this would send a request to the server to generate the report
+                setTimeout(function() {
+                    alert('Report generated successfully!');
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('generateReportModal'));
+                    modal.hide();
+                    
+                    // Add the new report to the list (in a real app, this would be done after the server response)
+                    const reportsList = document.getElementById('reportsList');
+                    const newRow = document.createElement('tr');
+                    const reportName = document.getElementById('reportName').value || 'New_Report';
+                    const reportType = document.getElementById('modalReportType').options[document.getElementById('modalReportType').selectedIndex].text;
+                    const formatType = document.getElementById('modalFormatType').value;
+                    
+                    const now = new Date();
+                    const dateStr = now.toISOString().split('T')[0] + ' ' + 
+                                    now.toTimeString().split(' ')[0].substring(0, 8);
+                    
+                    newRow.innerHTML = `
+                        <td>${reportName}</td>
+                        <td>${dateStr}</td>
+                        <td>${reportType}</td>
+                        <td>Custom Range</td>
+                        <td><span class="badge bg-${formatType === 'pdf' ? 'danger' : formatType === 'html' ? 'info' : formatType === 'csv' ? 'warning' : 'secondary'}">${formatType.toUpperCase()}</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary me-1">
+                                <i class="fas fa-download"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    
+                    reportsList.prepend(newRow);
+                }, 2000);
+            });
+            
+            // Download buttons
+            document.querySelectorAll('#reportsList .btn-outline-primary').forEach(button => {
+                button.addEventListener('click', function() {
+                    const reportName = this.closest('tr').cells[0].textContent;
+                    alert(`Downloading report: ${reportName}`);
+                    // In a real app, this would trigger a file download
+                });
+            });
+            
+            // Delete buttons
+            document.querySelectorAll('#reportsList .btn-outline-danger').forEach(button => {
+                button.addEventListener('click', function() {
+                    if (confirm('Are you sure you want to delete this report?')) {
+                        this.closest('tr').remove();
+                    }
+                });
+            });
+            
+            // Template buttons
+            document.querySelectorAll('.card .btn-outline-primary').forEach(button => {
+                button.addEventListener('click', function() {
+                    const templateName = this.closest('.card-body').querySelector('h5').textContent;
+                    
+                    // Open the modal with the template selected
+                    const modal = new bootstrap.Modal(document.getElementById('generateReportModal'));
+                    
+                    // Set the default values based on the template
+                    document.getElementById('reportName').value = `${templateName}_${new Date().toISOString().split('T')[0]}`;
+                    
+                    // Set the report type based on the template name
+                    const typeSelect = document.getElementById('modalReportType');
+                    for (let i = 0; i < typeSelect.options.length; i++) {
+                        if (typeSelect.options[i].text === templateName) {
+                            typeSelect.selectedIndex = i;
+                            break;
+                        }
+                    }
+                    
+                    modal.show();
+                });
+            });
+        });
+    </script>
+</body>
+</html>
