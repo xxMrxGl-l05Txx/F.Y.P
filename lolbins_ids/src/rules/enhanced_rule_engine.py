@@ -299,7 +299,7 @@ class EnhancedRuleEngine:
                 
         return False
     
-        def analyze_process(self, process_info):
+    def analyze_process(self, process_info):
         """
         Analyze a process against enhanced detection rules
         
@@ -314,123 +314,20 @@ class EnhancedRuleEngine:
         cmdline = ' '.join(process_info.get('cmdline', []))
         username = process_info.get('username', '')
         
-        # Update process history for context detection
-        self.update_process_history(process_info)
+        # Create a cache key from process name and command line
+        cache_key = f"{process_name}:{cmdline}"
         
-        # Skip analysis if process is whitelisted
-        if self.is_whitelisted(process_info):
-            logging.debug(f"Process whitelisted: {process_name}")
+        # Check cache first for previously analyzed commands
+        with self.cache_lock:
+            if cache_key in self.rule_cache:
+                self.cache_hits += 1
+                return self.rule_cache[cache_key]
+            else:
+                self.cache_misses += 1
+        
+        # Early exit if process is not a LOLBin
+        if process_name not in [rule.lolbin for rule in self.rules]:
             return results
-            
-        # Check each rule
-        for current_rule in self.rules:
-            if process_name == current_rule.lolbin:
-                # Check if command matches the suspicious pattern
-                if current_rule.pattern.search(cmdline):
-                    # Check for whitelist patterns
-                    whitelisted = False
-                    for whitelist_pattern in current_rule.whitelist_patterns:
-                        if whitelist_pattern.search(cmdline):
-                            logging.debug(f"Command matches whitelist pattern: {whitelist_pattern.pattern}")
-                            whitelisted = True
-                            break
-                    
-                    if whitelisted:
-                        continue
-                    
-                    # Check for required arguments
-                    if current_rule.required_args:
-                        required_args_present = all(arg in cmdline for arg in current_rule.required_args)
-                        if not required_args_present:
-                            continue
-                    
-                    # Check for required context
-                    if current_rule.context_required:
-                        # Get the process history for this user
-                        user_history = self.process_history[username]
-                        context_match = any(ctx_proc in user_history for ctx_proc in current_rule.context_required)
-                        
-                        if not context_match and current_rule.context_required:
-                            # Lower severity if context is not fully matched
-                            adjusted_severity = max(1, current_rule.severity - 2)
-                            logging.debug(f"Context not fully matched. Severity adjusted from {current_rule.severity} to {adjusted_severity}")
-                        else:
-                            adjusted_severity = current_rule.severity
-                    else:
-                        adjusted_severity = current_rule.severity
-                    
-                    # Create alert
-                    alert = {
-                        'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                        'rule_name': current_rule.name,
-                        'description': current_rule.description,
-                        'severity': adjusted_severity,
-                        'process_name': process_name,
-                        'command_line': cmdline,
-                        'pid': process_info.get('pid'),
-                        'username': username,
-                        'context': list(self.process_history[username])
-                    }
-                    
-                    logging.warning(f"Rule triggered: {current_rule.name} (Severity: {adjusted_severity})")
-                    results.append(alert)
-        
-        return results
-            
-        # Check each rule
-        for current_rule in self.rules:
-            if process_name == current_rule.lolbin:
-                # Check if command matches the suspicious pattern
-                if current_rule.pattern.search(cmdline):
-                    # Check for whitelist patterns
-                    whitelisted = False
-                    for whitelist_pattern in current_rule.whitelist_patterns:
-                        if whitelist_pattern.search(cmdline):
-                            logging.debug(f"Command matches whitelist pattern: {whitelist_pattern.pattern}")
-                            whitelisted = True
-                            break
-                    
-                    if whitelisted:
-                        continue
-                    
-                    # Check for required arguments
-                    if current_rule.required_args:
-                        required_args_present = all(arg in cmdline for arg in current_rule.required_args)
-                        if not required_args_present:
-                            continue
-                    
-                    # Check for required context
-                    if current_rule.context_required:
-                        # Get the process history for this user
-                        user_history = self.process_history[username]
-                        context_match = any(ctx_proc in user_history for ctx_proc in current_rule.context_required)
-                        
-                        if not context_match and current_rule.context_required:
-                            # Lower severity if context is not fully matched
-                            adjusted_severity = max(1, current_rule.severity - 2)
-                            logging.debug(f"Context not fully matched. Severity adjusted from {current_rule.severity} to {adjusted_severity}")
-                        else:
-                            adjusted_severity = current_rule.severity
-                    else:
-                        adjusted_severity = current_rule.severity
-                    
-                    # Create alert
-                    alert = {
-                        'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                        'rule_name': current_rule.name,
-                        'description': current_rule.description,
-                        'severity': adjusted_severity,
-                        'process_name': process_name,
-                        'command_line': cmdline,
-                        'pid': process_info.get('pid'),
-                        'username': username,
-                        'context': list(self.process_history[username])
-                    }
-                    
-                    logging.warning(f"Rule triggered: {current_rule.name} (Severity: {adjusted_severity})")
-                    results.append(alert)
-        
-        return results
         
         # Update process history for context detection
         self.update_process_history(process_info)
@@ -440,22 +337,6 @@ class EnhancedRuleEngine:
             logging.debug(f"Process whitelisted: {process_name}")
             return results
         
-        # Only process rules for the current LOLBin (avoid looping through all rules)
-        applicable_rules = [rule for rule in self.rules if rule.lolbin == process_name]
-        
-        alert = {
-            'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            'rule_name': rule.name,
-            'description': rule.description,
-            'severity': adjusted_severity,
-            'process_name': process_name,
-            'command_line': cmdline,
-            'pid': process_info.get('pid'),
-            'username': username,
-            'context': list(self.process_history[username])
-        }
-        # Check if process is a known LOLBin
-            
         # Check each rule
         for rule in self.rules:
             if process_name == rule.lolbin:
@@ -506,12 +387,12 @@ class EnhancedRuleEngine:
                         'context': list(self.process_history[username])
                     }
                     
+                    # Add MITRE ATT&CK mapping if available
+                    if rule.name in MITRE_ATTACK_MAPPINGS:
+                        alert['mitre_attack'] = MITRE_ATTACK_MAPPINGS[rule.name]
+                    
                     logging.warning(f"Rule triggered: {rule.name} (Severity: {adjusted_severity})")
                     results.append(alert)
-
-                if rule.name in MITRE_ATTACK_MAPPINGS:
-                    alert['mitre_attack'] = MITRE_ATTACK_MAPPINGS[rule.name]
-        
         
         # Update cache
         with self.cache_lock:
@@ -520,9 +401,9 @@ class EnhancedRuleEngine:
                 self.rule_cache[cache_key] = results.copy()
             
             # Limit cache size to prevent memory issues
-                if len(self.rule_cache) > 10000:
+            if len(self.rule_cache) > 10000:
                 # Clear half the cache when it gets too large
-                    self.rule_cache = dict(list(self.rule_cache.items())[-5000:])            
+                self.rule_cache = dict(list(self.rule_cache.items())[-5000:])            
         
         return results
 
