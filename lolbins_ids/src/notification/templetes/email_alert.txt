@@ -1,0 +1,17 @@
+LOLBins IDS Security Alert: {{title}}
+=================================================================
+
+ALERT: {{rule_name}}
+Detected at: {{timestamp}}
+
+{{description}}
+
+Severity: {{severity}} ({{severity_text}})
+Process: {{process_name}} (PID: {{pid}})
+User: {{username}}
+
+Command:
+{{command_line}}
+
+=================================================================
+Please investigate this alert promptly.

@@ -129,7 +129,17 @@ class ConsoleAlertMethod(AlertMethod):
         rule_name = alert_data.get("rule_name", "Unknown Rule")
         process = alert_data.get("process_name", "Unknown Process")
         
-        # Format the alert message
+        # Format the alert message with MITRE ATT&CK info if available
+        mitre_info = ""
+        if 'mitre_attack' in alert_data:
+            attack = alert_data['mitre_attack']
+            mitre_info = (
+                f"MITRE ATT&CK:\n"
+                f"Technique: {attack['technique_id']} - {attack['technique_name']}\n"
+                f"Tactic: {attack['tactic']}\n"
+                f"Reference: {attack['url']}\n"
+            )
+        
         alert_message = (
             f"\n{'='*60}\n"
             f"SECURITY ALERT - Severity: {severity}/5\n"
@@ -139,6 +149,7 @@ class ConsoleAlertMethod(AlertMethod):
             f"Command: {alert_data.get('command_line', 'Unknown')}\n"
             f"Description: {alert_data.get('description', 'No description')}\n"
             f"Timestamp: {alert_data.get('timestamp', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))}\n"
+            f"{mitre_info}"
             f"{'='*60}\n"
         )
         

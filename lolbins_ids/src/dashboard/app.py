@@ -6,6 +6,13 @@ import sys
 import json
 import logging
 from datetime import datetime, timedelta
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from rules.enhanced_rule_engine import EnhancedRuleEngine
+from alerts.alert_system import AlertManager
+from utils.performance_monitor import PerformanceMonitor
+
 
 # Add parent directory to path for imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

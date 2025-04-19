@@ -1,100 +1,8 @@
-# import psutil
-# import logging
-# import sys
-# import os
-# from datetime import datetime
-
-# # Add parent directory to path to import from other modules
-# sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-# from rules.rule_engine import RuleEngine
-
-# class ProcessMonitor:
-#     def __init__(self):
-#         # Initialize list of LOLBins to monitor
-#         self.watched_binaries = [
-#             'certutil.exe',
-#             'regsvr32.exe',
-#             'powershell.exe',
-#             'bitsadmin.exe',
-#             'mshta.exe',
-#             'wmic.exe'
-#         ]
-        
-#         # Setup basic logging
-#         self.setup_logging()
-        
-#         # Initialize the rule engine
-#         self.rule_engine = RuleEngine()
-
-#     def setup_logging(self):
-#         logging.basicConfig(
-#             level=logging.INFO,
-#             format='%(asctime)s - %(levelname)s - %(message)s',
-#             filename='lolbins_monitor.log'
-#         )
-#         # Also log to console
-#         console = logging.StreamHandler()
-#         console.setLevel(logging.INFO)
-#         formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-#         console.setFormatter(formatter)
-#         logging.getLogger('').addHandler(console)
-
-#     def monitor_processes(self):
-#         """
-#         Monitor system processes for LOLBins activity
-#         """
-#         logging.info("Starting LOLBins monitoring...")
-#         try:
-#             for proc in psutil.process_iter(['name', 'cmdline', 'pid', 'username']):
-#                 try:
-#                     if proc.info['name'] and proc.info['name'].lower() in self.watched_binaries:
-#                         self._analyze_process(proc.info)
-#                 except (psutil.NoSuchProcess, psutil.AccessDenied) as e:
-#                     continue
-#         except Exception as e:
-#             logging.error(f"Error in process monitoring: {str(e)}")
-
-#     def _analyze_process(self, process_info):
-#         """
-#         Analyze detected LOLBin process
-#         """
-#         try:
-#             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-#             logging.info(f"LOLBin detected: {process_info['name']} (PID: {process_info['pid']})")
-            
-#             # Pass to rule engine for analysis
-#             alerts = self.rule_engine.analyze_process(process_info)
-            
-#             if alerts:
-#                 logging.warning(f"ALERT: Found {len(alerts)} suspicious behaviors!")
-#                 for alert in alerts:
-#                     log_message = (
-#                         f"SECURITY ALERT!\n"
-#                         f"Rule: {alert['rule_name']}\n"
-#                         f"Severity: {alert['severity']}/5\n"
-#                         f"Description: {alert['description']}\n"
-#                         f"Process: {alert['process_name']} (PID: {alert['pid']})\n"
-#                         f"User: {alert['username']}\n"
-#                         f"Command: {alert['command_line']}\n"
-#                         f"Timestamp: {alert['timestamp']}\n"
-#                         f"----------------------"
-#                     )
-#                     logging.warning(log_message)
-#             else:
-#                 logging.info(f"No suspicious behavior detected for {process_info['name']}")
-                
-#         except Exception as e:
-#             logging.error(f"Error analyzing process: {str(e)}")
-
-# if __name__ == "__main__":
-#     # Test the monitor
-#     monitor = ProcessMonitor()
-#     monitor.monitor_processes()
-
 import psutil
 import logging
 import sys
 import os
+from notification.notification_orchestrator import NotificationOrchestrator
 from datetime import datetime
 
 # Add parent directory to path to import from other modules
@@ -111,7 +19,12 @@ class ProcessMonitor:
             'powershell.exe',
             'bitsadmin.exe',
             'mshta.exe',
-            'wmic.exe'
+            'wmic.exe',
+            'rundll32.exe',   # Commonly used to execute malicious DLLs
+            'odbcconf.exe',   # Can be used to execute DLLs
+            'msiexec.exe',    # Can install malicious MSI packages remotely
+            'forfiles.exe',   # Command execution through /c parameter
+            'installutil.exe' # .NET binary that can bypass AppLocker
         ]
         
         # Setup basic logging
@@ -124,6 +37,12 @@ class ProcessMonitor:
         self.alert_manager = AlertManager(config_file)
         
         logging.info("Process Monitor initialized successfully")
+
+        config_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                    'config', 'config.json')
+        self.notification_orchestrator = NotificationOrchestrator(
+            config_file=config_path if os.path.exists(config_path) else None
+        )
 
     def setup_logging(self):
         logging.basicConfig(
@@ -158,8 +77,9 @@ class ProcessMonitor:
         Analyze detected LOLBin process
         """
         try:
-            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            logging.info(f"LOLBin detected: {process_info['name']} (PID: {process_info['pid']})")
+            # Get current timestamp for logging
+            current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            logging.info(f"LOLBin detected: {process_info['name']} (PID: {process_info['pid']}) at {current_time}")
             
             # Pass to rule engine for analysis
             alerts = self.rule_engine.analyze_process(process_info)
@@ -170,6 +90,7 @@ class ProcessMonitor:
                 # Send alerts through the alert manager
                 for alert in alerts:
                     self.alert_manager.send_alert(alert)
+                    self.notification_orchestrator.process_alert(alert)
                     
                     # Still log the alert to our log file
                     log_message = (
