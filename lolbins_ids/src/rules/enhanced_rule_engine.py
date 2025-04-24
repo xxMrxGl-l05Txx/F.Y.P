@@ -10,6 +10,7 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils.mitre_mappings import MITRE_ATTACK_MAPPINGS
+from database.process_history import ProcessHistoryDB
 
 class EnhancedRule:
     def __init__(self, name, description, lolbin, pattern, severity=1, 
@@ -43,7 +44,7 @@ class EnhancedRuleEngine:
     def __init__(self, config_file=None):
         """Initialize the enhanced rule engine with predefined rules"""
         self.rules = []
-        self.process_history = defaultdict(lambda: deque(maxlen=10))  # Stores recent processes per user
+        self.process_history_db = ProcessHistoryDB()  # Stores recent processes per user
         self.whitelist = self._load_whitelist(config_file)
         self._initialize_rules()
         self.rule_cache = {}  # Cache for previously analyzed commands
@@ -276,7 +277,7 @@ class EnhancedRuleEngine:
         process_name = process_info.get('name', '').lower()
         
         if process_name:
-            self.process_history[username].append(process_name)
+            self.process_history_db.add_process(process_info)
     
     def is_whitelisted(self, process_info):
         """Check if process is whitelisted"""
@@ -312,7 +313,7 @@ class EnhancedRuleEngine:
         results = []
         process_name = process_info.get('name', '').lower()
         cmdline = ' '.join(process_info.get('cmdline', []))
-        username = process_info.get('username', '')
+        user_history = self.process_history_db.get_user_context(username)
         
         # Create a cache key from process name and command line
         cache_key = f"{process_name}:{cmdline}"

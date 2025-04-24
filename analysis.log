@@ -1,0 +1,10 @@
+2025-04-24 11:12:20,855 - INFO - Connected to MongoDB database: lolbins_ids
+2025-04-24 11:12:20,855 - INFO - Starting scheduled threat analysis...
+2025-04-24 11:41:05,315 - INFO - Connected to MongoDB database: lolbins_ids
+2025-04-24 11:41:05,315 - INFO - Starting scheduled threat analysis...
+2025-04-24 11:41:05,462 - INFO - Analysis results stored in database
+2025-04-24 11:41:05,462 - INFO - Analysis complete
+2025-04-24 11:45:45,386 - INFO - Connected to MongoDB database: lolbins_ids
+2025-04-24 11:45:45,387 - INFO - Starting scheduled threat analysis...
+2025-04-24 11:45:45,424 - INFO - Analysis results stored in database
+2025-04-24 11:45:45,425 - INFO - Analysis complete

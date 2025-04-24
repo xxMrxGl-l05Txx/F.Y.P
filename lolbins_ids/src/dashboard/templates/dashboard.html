@@ -412,58 +412,91 @@
     </style>
 </head>
 <body>
-    <!-- Sidebar -->
+
+    <!-- Notification Toast Container -->
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1100;">
+        <!-- Notifications will be dynamically inserted here -->
+    </div>
+    
+    <!-- This is a reusable sidebar template to maintain consistency across pages -->
     <div class="sidebar">
         <div class="sidebar-header">
-            <a href="#" class="sidebar-brand">
+            <a href="/dashboard" class="sidebar-brand">
                 <i class="fas fa-shield-alt"></i>
                 <span>LOLBins IDS</span>
             </a>
         </div>
         <div class="sidebar-menu">
             <div class="menu-header">Monitoring</div>
-            <a href="/" class="sidebar-link active">
+            <a href="/dashboard" class="sidebar-link" id="nav-dashboard">
                 <i class="fas fa-tachometer-alt"></i>
                 <span>Dashboard</span>
             </a>
-            <a href="/alerts" class="sidebar-link">
+            <a href="/alerts" class="sidebar-link" id="nav-alerts">
                 <i class="fas fa-exclamation-triangle"></i>
                 <span>Alerts</span>
             </a>
-            <a href="/analytics" class="sidebar-link">
+            <a href="/analytics" class="sidebar-link" id="nav-analytics">
                 <i class="fas fa-chart-line"></i>
                 <span>Analytics</span>
             </a>
             
             <div class="menu-header">Management</div>
-            <a href="/settings" class="sidebar-link">
+            <a href="/settings" class="sidebar-link" id="nav-settings">
                 <i class="fas fa-cog"></i>
                 <span>Settings</span>
             </a>
-            <a href="/reports" class="sidebar-link">
+            <a href="/reports" class="sidebar-link" id="nav-reports">
                 <i class="fas fa-file-alt"></i>
                 <span>Reports</span>
             </a>
-            <a href="/rule_management" class="sidebar-link">
+            <a href="/rules" class="sidebar-link" id="nav-rules">
                 <i class="fas fa-list-check"></i>
                 <span>Rules</span>
             </a>
-            <a href="/whitelist" class="sidebar-link">
+            <a href="/whitelist" class="sidebar-link" id="nav-whitelist">
                 <i class="fas fa-shield-halved"></i>
                 <span>Whitelist</span>
             </a>
             
             <div class="menu-header">System</div>
-            <a href="/about" class="sidebar-link">
+            <a href="/about" class="sidebar-link" id="nav-about">
                 <i class="fas fa-info-circle"></i>
                 <span>About</span>
             </a>
-            <a href="/logout" class="sidebar-link">
+            <a href="/logout" class="sidebar-link" id="nav-logout">
                 <i class="fas fa-sign-out-alt"></i>
                 <span>Logout</span>
             </a>
         </div>
     </div>
+
+    <!-- Add this script to set the active navigation item based on current page -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get current page URL
+            const currentPath = window.location.pathname;
+            
+            // Set active class for appropriate navigation link
+            if (currentPath === '/' || currentPath === '/dashboard') {
+                document.getElementById('nav-dashboard').classList.add('active');
+            } else if (currentPath === '/alerts') {
+                document.getElementById('nav-alerts').classList.add('active');
+            } else if (currentPath === '/analytics') {
+                document.getElementById('nav-analytics').classList.add('active');
+            } else if (currentPath === '/settings') {
+                document.getElementById('nav-settings').classList.add('active');
+            } else if (currentPath === '/reports') {
+                document.getElementById('nav-reports').classList.add('active');
+            } else if (currentPath === '/rules') {
+                document.getElementById('nav-rules').classList.add('active');
+            } else if (currentPath === '/whitelist') {
+                document.getElementById('nav-whitelist').classList.add('active');
+            } else if (currentPath === '/about') {
+                document.getElementById('nav-about').classList.add('active');
+            }
+        });
+    </script>
 
     <!-- Main content -->
     <div class="main-content">
@@ -1033,6 +1066,154 @@
             loadSummaryData();
             loadRecentAlerts();
             loadChartData();
+        }
+    </script>
+    
+    <!-- Socket.IO Client -->
+    <script src="https://cdn.socket.io/4.4.1/socket.io.min.js"></script>
+    
+    <!-- Notification Handler Script -->
+    <script>
+        // Initialize Socket.IO connection
+        const socket = io();
+        
+        // Toast counter for unique IDs
+        let toastCounter = 0;
+        
+        // Connect to the server
+        socket.on('connect', () => {
+            console.log('Connected to notification system');
+        });
+        
+        // Notification handler
+        socket.on('notification', (alert) => {
+            console.log('Received notification:', alert);
+            showNotificationToast(alert);
+        });
+        
+        // Create and show a toast notification
+        function showNotificationToast(alert) {
+            // Get severity and style based on alert level
+            const severity = alert.severity || 3;
+            let bgColor, iconClass;
+            
+            switch(severity) {
+                case 5:
+                    bgColor = 'bg-danger';
+                    iconClass = 'fa-radiation';
+                    break;
+                case 4:
+                    bgColor = 'bg-warning text-dark';
+                    iconClass = 'fa-exclamation-triangle';
+                    break;
+                case 3:
+                    bgColor = 'bg-primary';
+                    iconClass = 'fa-exclamation-circle';
+                    break;
+                default:
+                    bgColor = 'bg-info text-dark';
+                    iconClass = 'fa-info-circle';
+            }
+            
+            // Format title based on severity
+            let title;
+            if (severity >= 5) {
+                title = `CRITICAL ALERT: ${alert.rule_name}`;
+            } else if (severity >= 4) {
+                title = `HIGH SEVERITY: ${alert.rule_name}`;
+            } else if (severity >= 3) {
+                title = `ALERT: ${alert.rule_name}`;
+            } else {
+                title = `Notification: ${alert.rule_name}`;
+            }
+            
+            // Create toast element
+            const toastId = `notification-toast-${toastCounter++}`;
+            const toast = document.createElement('div');
+            toast.className = `toast ${bgColor}`;
+            toast.id = toastId;
+            toast.setAttribute('role', 'alert');
+            toast.setAttribute('aria-live', 'assertive');
+            toast.setAttribute('aria-atomic', 'true');
+            
+            // Toast content
+            toast.innerHTML = `
+                <div class="toast-header ${bgColor}">
+                    <i class="fas ${iconClass} me-2"></i>
+                    <strong class="me-auto">${title}</strong>
+                    <small>${alert.timestamp ? new Date(alert.timestamp).toLocaleTimeString() : 'Now'}</small>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body">
+                    <p>${alert.description || ''}</p>
+                    <p><strong>Process:</strong> ${alert.process_name || 'Unknown'}</p>
+                    ${alert.correlation && alert.correlation.is_correlated ? 
+                        `<p class="mt-2 mb-0 fw-bold text-warning">
+                            ${alert.correlation.attack_chain_complete ? 'ATTACK CHAIN DETECTED!' : 'Part of potential attack chain'}
+                        </p>` : ''}
+                    <div class="mt-2 pt-2 border-top">
+                        <a href="/alerts" class="btn btn-sm btn-light">View Details</a>
+                    </div>
+                </div>
+            `;
+            
+            // Add to container
+            document.querySelector('.toast-container').appendChild(toast);
+            
+            // Initialize and show the toast
+            const toastInstance = new bootstrap.Toast(toast, {
+                autohide: true,
+                delay: severity >= 4 ? 10000 : 5000 // Show critical alerts longer
+            });
+            toastInstance.show();
+            
+            // Play notification sound based on severity
+            playNotificationSound(severity);
+            
+            // Remove from DOM after hiding
+            toast.addEventListener('hidden.bs.toast', function() {
+                toast.remove();
+            });
+        }
+        
+        // Play notification sound
+        function playNotificationSound(severity) {
+            // Create audio element
+            const audio = new Audio();
+            
+            // Set sound file based on severity
+            if (severity >= 5) {
+                audio.src = 'https://cdn.freesound.org/previews/250/250629_4486188-lq.mp3'; // Critical alert sound
+            } else if (severity >= 4) {
+                audio.src = 'https://cdn.freesound.org/previews/274/274833_5298740-lq.mp3'; // High severity sound
+            } else {
+                audio.src = 'https://cdn.freesound.org/previews/536/536113_7146125-lq.mp3'; // Normal alert sound
+            }
+            
+            // Play the sound
+            audio.play().catch(e => {
+                console.log('Error playing notification sound:', e);
+                // Auto-play may be blocked by browser policy
+            });
+        }
+        
+        // Test function - can be called from console for testing
+        function testNotification(severity = 3) {
+            const testAlert = {
+                timestamp: new Date().toISOString(),
+                rule_name: "Test Notification",
+                description: "This is a test notification from the dashboard",
+                severity: severity,
+                process_name: "test.exe",
+                command_line: "test.exe --notification",
+                correlation: severity >= 4 ? {
+                    is_correlated: true,
+                    attack_chain_complete: severity >= 5,
+                    rule_name: "Test Attack Chain"
+                } : null
+            };
+            
+            showNotificationToast(testAlert);
         }
     </script>
 </body>

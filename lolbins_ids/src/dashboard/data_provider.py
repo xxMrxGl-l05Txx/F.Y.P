@@ -4,6 +4,60 @@ import json
 import logging
 from datetime import datetime, timedelta
 import pandas as pd
+from database.connection import DatabaseConnection
+import pymongo
+from datetime import datetime, timedelta
+
+class MongoDataProvider:
+    def __init__(self):
+        connection = DatabaseConnection.get_instance()
+        self.db = connection.db
+        
+    def get_recent_alerts(self, limit=50):
+        """Get recent alerts for dashboard display"""
+        return list(self.db.alerts.find(
+            {}, 
+            sort=[("timestamp", pymongo.DESCENDING)],
+            limit=limit
+        ))
+    
+    def get_alert_stats(self, days=7):
+        """Get alert statistics for the dashboard"""
+        end_date = datetime.now()
+        start_date = end_date - timedelta(days=days)
+        
+        # Get severity distribution
+        severity_pipeline = [
+            {"$match": {"timestamp": {"$gte": start_date.strftime("%Y-%m-%d %H:%M:%S")}}},
+            {"$group": {"_id": "$severity", "count": {"$sum": 1}}},
+            {"$sort": {"_id": -1}}
+        ]
+        severity_stats = list(self.db.alerts.aggregate(severity_pipeline))
+        
+        # Get top triggered rules
+        rules_pipeline = [
+            {"$match": {"timestamp": {"$gte": start_date.strftime("%Y-%m-%d %H:%M:%S")}}},
+            {"$group": {"_id": "$rule_name", "count": {"$sum": 1}}},
+            {"$sort": {"count": -1}},
+            {"$limit": 5}
+        ]
+        top_rules = list(self.db.alerts.aggregate(rules_pipeline))
+        
+        # Get top LOLBins
+        lolbins_pipeline = [
+            {"$match": {"timestamp": {"$gte": start_date.strftime("%Y-%m-%d %H:%M:%S")}}},
+            {"$group": {"_id": "$process_name", "count": {"$sum": 1}}},
+            {"$sort": {"count": -1}},
+            {"$limit": 5}
+        ]
+        top_lolbins = list(self.db.alerts.aggregate(lolbins_pipeline))
+        
+        return {
+            "severity_stats": severity_stats,
+            "top_rules": top_rules,
+            "top_lolbins": top_lolbins
+        }
+
 
 class DataProvider:
     def __init__(self, alerts_file=None):

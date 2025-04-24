@@ -1,0 +1,523 @@
+<!-- templates/about.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOLBins IDS | About</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Same style as the dashboard -->
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #34495e;
+            --accent: #3498db;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --success: #2ecc71;
+            --info: #3498db;
+            --light-bg: #ecf0f1;
+            --dark-bg: #1a1a1a;
+            --card-bg: #2c3e50;
+            --text-light: #ecf0f1;
+            --text-dark: #2c3e50;
+            --border-radius: 8px;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Roboto', sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--text-light);
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            background-color: var(--secondary);
+            min-height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            z-index: 1000;
+            transition: all 0.3s;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sidebar-header {
+            padding: 20px 15px;
+            background-color: var(--primary);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-brand {
+            color: var(--text-light);
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+        
+        .sidebar-brand i {
+            margin-right: 10px;
+            color: var(--accent);
+        }
+        
+        .sidebar-menu {
+            padding: 15px 0;
+        }
+        
+        .menu-header {
+            color: rgba(255, 255, 255, 0.5);
+            padding: 10px 25px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 10px;
+        }
+        
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            color: rgba(255, 255, 255, 0.7);
+            padding: 12px 25px;
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+        
+        .sidebar-link i {
+            margin-right: 10px;
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .sidebar-link.active {
+            color: var(--text-light);
+            background-color: rgba(0, 0, 0, 0.1);
+            border-left: 3px solid var(--accent);
+        }
+        
+        .sidebar-link:hover {
+            color: var(--text-light);
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Main content */
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        
+        /* Header */
+        .header {
+            background-color: var(--primary);
+            padding: 15px 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+            margin: 0;
+        }
+        
+        /* Cards */
+        .card {
+            background-color: var(--card-bg);
+            border: none;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            color: var(--text-light);
+        }
+        
+        .card-header {
+            background-color: rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px 20px;
+            font-weight: 600;
+        }
+        
+        .card-body {
+            padding: 20px;
+        }
+        
+        /* About page specific styles */
+        .version-badge {
+            background-color: var(--accent);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            margin-left: 10px;
+        }
+        
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background-color: rgba(52, 152, 219, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+        
+        .feature-icon i {
+            font-size: 24px;
+            color: var(--accent);
+        }
+        
+        .tech-badge {
+            background-color: var(--secondary);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            display: inline-block;
+            margin: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .team-member {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .team-avatar {
+            width: 100px;
+            height: 100px;
+            background-color: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-size: 36px;
+            color: var(--accent);
+        }
+        
+        /* Media queries */
+        @media (max-width: 991.98px) {
+            .sidebar {
+                width: 80px;
+            }
+            
+            .sidebar-brand span, .sidebar-link span, .menu-header {
+                display: none;
+            }
+            
+            .sidebar-brand i, .sidebar-link i {
+                margin-right: 0;
+                font-size: 1.3rem;
+            }
+            
+            .sidebar-link {
+                justify-content: center;
+                padding: 15px;
+            }
+            
+            .main-content {
+                margin-left: 80px;
+            }
+        }
+        
+        @media (max-width: 767.98px) {
+            .main-content {
+                margin-left: 0;
+                padding: 15px;
+            }
+            
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .mobile-menu-toggle {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <a href="/dashboard" class="sidebar-brand">
+                <i class="fas fa-shield-alt"></i>
+                <span>LOLBins IDS</span>
+            </a>
+        </div>
+        <div class="sidebar-menu">
+            <div class="menu-header">Monitoring</div>
+            <a href="/dashboard" class="sidebar-link">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="/alerts" class="sidebar-link">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>Alerts</span>
+            </a>
+            <a href="/analytics" class="sidebar-link">
+                <i class="fas fa-chart-line"></i>
+                <span>Analytics</span>
+            </a>
+            
+            <div class="menu-header">Management</div>
+            <a href="/settings" class="sidebar-link">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </a>
+            <a href="/reports" class="sidebar-link">
+                <i class="fas fa-file-alt"></i>
+                <span>Reports</span>
+            </a>
+            <a href="/rules" class="sidebar-link">
+                <i class="fas fa-list-check"></i>
+                <span>Rules</span>
+            </a>
+            <a href="/whitelist" class="sidebar-link">
+                <i class="fas fa-shield-halved"></i>
+                <span>Whitelist</span>
+            </a>
+            
+            <div class="menu-header">System</div>
+            <a href="/about" class="sidebar-link active">
+                <i class="fas fa-info-circle"></i>
+                <span>About</span>
+            </a>
+            <a href="/logout" class="sidebar-link">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="main-content">
+        <!-- Header -->
+        <div class="header">
+            <h1>About LOLBins IDS <span class="version-badge">v1.0.0</span></h1>
+        </div>
+
+        <!-- About Overview -->
+        <div class="row mb-4">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header">
+                        System Overview
+                    </div>
+                    <div class="card-body">
+                        <p>LOLBins IDS is a behavior-based Intrusion Detection System specifically designed to detect and monitor Living Off The Land Binary (LOLBin) attacks. These attacks abuse legitimate Windows binaries to execute malicious code, making them difficult to detect with traditional signature-based approaches.</p>
+                        
+                        <p>This system uses Wazuh as its foundation and extends it with custom detection rules, decoders, and behavioral analysis capabilities to identify suspicious usage patterns of legitimate Windows binaries commonly exploited by attackers.</p>
+                        
+                        <h5 class="mt-4 mb-3">Key Features</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="d-flex">
+                                    <div class="feature-icon me-3">
+                                        <i class="fas fa-fingerprint"></i>
+                                    </div>
+                                    <div>
+                                        <h6>Behavioral Analysis</h6>
+                                        <p class="text-white-50">Detects suspicious patterns rather than just signatures, capturing novel attack techniques.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="d-flex">
+                                    <div class="feature-icon me-3">
+                                        <i class="fas fa-cogs"></i>
+                                    </div>
+                                    <div>
+                                        <h6>Custom LOLBin Rules</h6>
+                                        <p class="text-white-50">Specialized detection rules for commonly abused Windows binaries like PowerShell, CertUtil, and Regsvr32.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="d-flex">
+                                    <div class="feature-icon me-3">
+                                        <i class="fas fa-bell"></i>
+                                    </div>
+                                    <div>
+                                        <h6>Real-time Alerts</h6>
+                                        <p class="text-white-50">Immediate notification system with configurable channels and priority-based routing.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="d-flex">
+                                    <div class="feature-icon me-3">
+                                        <i class="fas fa-chart-pie"></i>
+                                    </div>
+                                    <div>
+                                        <h6>Comprehensive Dashboard</h6>
+                                        <p class="text-white-50">Visualize security events, analyze trends, and investigate incidents from a central console.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        System Information
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-dark">
+                            <tbody>
+                                <tr>
+                                    <td><strong>Version</strong></td>
+                                    <td>1.0.0</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>License</strong></td>
+                                    <td>MIT</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Built With</strong></td>
+                                    <td>Python 3.13, Flask, Wazuh</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>OS Support</strong></td>
+                                    <td>Windows 10/11, Server 2019/2022</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Updated</strong></td>
+                                    <td>April 21, 2025</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>GitHub</strong></td>
+                                    <td><a href="https://github.com/username/lolbins-ids" target="_blank" class="text-info">github.com/username/lolbins-ids</a></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <div class="d-grid gap-2 mt-3">
+                            <a href="https://github.com/username/lolbins-ids/issues" target="_blank" class="btn btn-outline-info">
+                                <i class="fas fa-bug me-2"></i> Report an Issue
+                            </a>
+                            <a href="https://github.com/username/lolbins-ids/wiki" target="_blank" class="btn btn-outline-light">
+                                <i class="fas fa-book me-2"></i> Documentation
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Technology Stack -->
+        <div class="card mb-4">
+            <div class="card-header">
+                Technology Stack
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-4">
+                        <h5>Backend</h5>
+                        <div>
+                            <span class="tech-badge">Python 3.13</span>
+                            <span class="tech-badge">Flask</span>
+                            <span class="tech-badge">Socket.IO</span>
+                            <span class="tech-badge">SQLite</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <h5>Frontend</h5>
+                        <div>
+                            <span class="tech-badge">HTML5</span>
+                            <span class="tech-badge">CSS3</span>
+                            <span class="tech-badge">JavaScript</span>
+                            <span class="tech-badge">Bootstrap 5</span>
+                            <span class="tech-badge">Chart.js</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <h5>Security Framework</h5>
+                        <div>
+                            <span class="tech-badge">Wazuh</span>
+                            <span class="tech-badge">MITRE ATT&CK</span>
+                            <span class="tech-badge">Regular Expressions</span>
+                            <span class="tech-badge">Event Correlation</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MITRE ATT&CK Coverage -->
+        <div class="card mb-4">
+            <div class="card-header">
+                MITRE ATT&CK Coverage
+            </div>
+            <div class="card-body">
+                <p>LOLBins IDS provides detection capabilities for the following MITRE ATT&CK techniques commonly associated with LOLBin abuse:</p>
+                
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <h6>Execution</h6>
+                        <ul class="list-unstyled">
+                            <li><span class="badge bg-secondary me-2">T1059.001</span>PowerShell</li>
+                            <li><span class="badge bg-secondary me-2">T1059.003</span>Windows Command Shell</li>
+                            <li><span class="badge bg-secondary me-2">T1059.005</span>Visual Basic</li>
+                            <li><span class="badge bg-secondary me-2">T1059.007</span>JavaScript</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <h6>Defense Evasion</h6>
+                        <ul class="list-unstyled">
+                            <li><span class="badge bg-secondary me-2">T1218.001</span>Compiled HTML File</li>
+                            <li><span class="badge bg-secondary me-2">T1218.005</span>Mshta</li>
+                            <li><span class="badge bg-secondary me-2">T1218.010</span>Regsvr32</li>
+                            <li><span class="badge bg-secondary me-2">T1140</span>Deobfuscate/Decode Files</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <h6>Command and Control</h6>
+                        <ul class="list-unstyled">
+                            <li><span class="badge bg-secondary me-2">T1105</span>Ingress Tool Transfer</li>
+                            <li><span class="badge bg-secondary me-2">T1071.001</span>Web Protocols</li>
+                            <li><span class="badge bg-secondary me-2">T1219</span>Remote Access Software</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Development Team -->
+        <div class="card">
+            <div class="card-header">
+                Development
+            </div>
+            <div class="card-body">
+                <p class="mb-4">LOLBins IDS is an open source project developed with a focus on enhancing Windows security monitoring capabilities for detecting advanced attacks.</p>
+                
+                <div class="text-center">
+                    <p>Want to contribute? Check out our GitHub repository:</p>
+                    <a href="https://github.com/username/lolbins-ids" target="_blank" class="btn btn-primary">
+                        <i class="fab fa-github me-2"></i> GitHub Repository
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

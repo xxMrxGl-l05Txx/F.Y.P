@@ -1,0 +1,782 @@
+<!-- templates/whitelist.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOLBins IDS | Whitelist</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Same style as the dashboard -->
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #34495e;
+            --accent: #3498db;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --success: #2ecc71;
+            --info: #3498db;
+            --light-bg: #ecf0f1;
+            --dark-bg: #1a1a1a;
+            --card-bg: #2c3e50;
+            --text-light: #ecf0f1;
+            --text-dark: #2c3e50;
+            --border-radius: 8px;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Roboto', sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--text-light);
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            background-color: var(--secondary);
+            min-height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            z-index: 1000;
+            transition: all 0.3s;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sidebar-header {
+            padding: 20px 15px;
+            background-color: var(--primary);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-brand {
+            color: var(--text-light);
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+        
+        .sidebar-brand i {
+            margin-right: 10px;
+            color: var(--accent);
+        }
+        
+        .sidebar-menu {
+            padding: 15px 0;
+        }
+        
+        .menu-header {
+            color: rgba(255, 255, 255, 0.5);
+            padding: 10px 25px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 10px;
+        }
+        
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            color: rgba(255, 255, 255, 0.7);
+            padding: 12px 25px;
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+        
+        .sidebar-link i {
+            margin-right: 10px;
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .sidebar-link.active {
+            color: var(--text-light);
+            background-color: rgba(0, 0, 0, 0.1);
+            border-left: 3px solid var(--accent);
+        }
+        
+        .sidebar-link:hover {
+            color: var(--text-light);
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Main content */
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        
+        /* Header */
+        .header {
+            background-color: var(--primary);
+            padding: 15px 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+            margin: 0;
+        }
+        
+        .header-actions {
+            display: flex;
+            align-items: center;
+        }
+        
+        .header-actions .btn {
+            margin-left: 10px;
+        }
+        
+        /* Cards */
+        .card {
+            background-color: var(--card-bg);
+            border: none;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            color: var(--text-light);
+        }
+        
+        .card-header {
+            background-color: rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px 20px;
+            font-weight: 600;
+        }
+        
+        .card-body {
+            padding: 20px;
+        }
+        
+        /* Form controls */
+        .form-control, .form-select {
+            background-color: #1e2b38;
+            border-color: rgba(255, 255, 255, 0.1);
+            color: var(--text-light);
+        }
+        
+        .form-control:focus, .form-select:focus {
+            background-color: #1e2b38;
+            border-color: var(--accent);
+            color: var(--text-light);
+            box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25);
+        }
+        
+        /* Tables */
+        .table {
+            color: var(--text-light);
+            margin-bottom: 0;
+        }
+        
+        .table thead th {
+            background-color: rgba(0, 0, 0, 0.2);
+            border-bottom: none;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+        }
+        
+        .table-dark {
+            background-color: var(--secondary);
+        }
+        
+        .table tbody td {
+            border-color: rgba(255, 255, 255, 0.05);
+            padding: 12px 15px;
+            vertical-align: middle;
+        }
+        
+        .table tbody tr:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        /* Media queries */
+        @media (max-width: 991.98px) {
+            .sidebar {
+                width: 80px;
+            }
+            
+            .sidebar-brand span, .sidebar-link span, .menu-header {
+                display: none;
+            }
+            
+            .sidebar-brand i, .sidebar-link i {
+                margin-right: 0;
+                font-size: 1.3rem;
+            }
+            
+            .sidebar-link {
+                justify-content: center;
+                padding: 15px;
+            }
+            
+            .main-content {
+                margin-left: 80px;
+            }
+        }
+        
+        @media (max-width: 767.98px) {
+            .main-content {
+                margin-left: 0;
+                padding: 15px;
+            }
+            
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .mobile-menu-toggle {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <a href="/dashboard" class="sidebar-brand">
+                <i class="fas fa-shield-alt"></i>
+                <span>LOLBins IDS</span>
+            </a>
+        </div>
+        <div class="sidebar-menu">
+            <div class="menu-header">Monitoring</div>
+            <a href="/dashboard" class="sidebar-link">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="/alerts" class="sidebar-link">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>Alerts</span>
+            </a>
+            <a href="/analytics" class="sidebar-link">
+                <i class="fas fa-chart-line"></i>
+                <span>Analytics</span>
+            </a>
+            
+            <div class="menu-header">Management</div>
+            <a href="/settings" class="sidebar-link">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </a>
+            <a href="/reports" class="sidebar-link">
+                <i class="fas fa-file-alt"></i>
+                <span>Reports</span>
+            </a>
+            <a href="/rules" class="sidebar-link">
+                <i class="fas fa-list-check"></i>
+                <span>Rules</span>
+            </a>
+            <a href="/whitelist" class="sidebar-link active">
+                <i class="fas fa-shield-halved"></i>
+                <span>Whitelist</span>
+            </a>
+            
+            <div class="menu-header">System</div>
+            <a href="/about" class="sidebar-link">
+                <i class="fas fa-info-circle"></i>
+                <span>About</span>
+            </a>
+            <a href="/logout" class="sidebar-link">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="main-content">
+        <!-- Header -->
+        <div class="header">
+            <h1>Whitelist Management</h1>
+            <div class="header-actions">
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addWhitelistModal">
+                    <i class="fas fa-plus me-1"></i> Add Whitelist Entry
+                </button>
+            </div>
+        </div>
+
+        <!-- Whitelist Categories -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h3 class="mb-0" id="totalWhitelistEntries">15</h3>
+                        <p class="text-muted mb-0">Total Entries</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h3 class="mb-0" id="processWhitelists">6</h3>
+                        <p class="text-muted mb-0">Process Whitelists</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h3 class="mb-0" id="commandLineWhitelists">8</h3>
+                        <p class="text-muted mb-0">Command Line Patterns</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h3 class="mb-0" id="filePathWhitelists">1</h3>
+                        <p class="text-muted mb-0">File Path Exceptions</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Whitelist Filters -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row g-2">
+                    <div class="col-md-3">
+                        <label for="whitelistTypeFilter" class="form-label">Whitelist Type</label>
+                        <select id="whitelistTypeFilter" class="form-select">
+                            <option value="all">All Types</option>
+                            <option value="process">Process</option>
+                            <option value="commandline">Command Line</option>
+                            <option value="filepath">File Path</option>
+                            <option value="hash">File Hash</option>
+                            <option value="user">User/Process Combination</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="lolbinFilter" class="form-label">LOLBin</label>
+                        <select id="lolbinFilter" class="form-select">
+                            <option value="all">All LOLBins</option>
+                            <option value="certutil.exe">certutil.exe</option>
+                            <option value="powershell.exe">powershell.exe</option>
+                            <option value="regsvr32.exe">regsvr32.exe</option>
+                            <option value="mshta.exe">mshta.exe</option>
+                            <option value="wmic.exe">wmic.exe</option>
+                            <option value="bitsadmin.exe">bitsadmin.exe</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="searchFilter" class="form-label">Search</label>
+                        <input type="text" id="searchFilter" class="form-control" placeholder="Search whitelist entries...">
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button id="applyFiltersBtn" class="btn btn-primary w-100">
+                            <i class="fas fa-filter me-1"></i> Filter
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Whitelist Table -->
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Whitelist Entries</span>
+                <div>
+                    <button class="btn btn-sm btn-outline-danger me-2" id="deleteSelectedBtn" disabled>
+                        <i class="fas fa-trash me-1"></i> Delete Selected
+                    </button>
+                    <button class="btn btn-sm btn-outline-light" id="exportWhitelistBtn">
+                        <i class="fas fa-download me-1"></i> Export
+                    </button>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 40px;">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="selectAllWhitelist">
+                                    </div>
+                                </th>
+                                <th>Type</th>
+                                <th>LOLBin</th>
+                                <th>Pattern/Value</th>
+                                <th>Added By</th>
+                                <th>Date Added</th>
+                                <th style="width: 120px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="whitelistTable">
+                            <!-- Process Whitelist Entry -->
+                            <tr>
+                                <td>
+                                    <div class="form-check">
+                                        <input class="form-check-input whitelist-checkbox" type="checkbox">
+                                    </div>
+                                </td>
+                                <td><span class="badge bg-primary">Process</span></td>
+                                <td>certutil.exe</td>
+                                <td><code>C:\\Windows\\System32\\certutil.exe</code></td>
+                                <td>administrator</td>
+                                <td>2025-03-10</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-info me-1" data-bs-toggle="modal" data-bs-target="#whitelistDetailModal">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            
+                            <!-- Command Line Pattern -->
+                            <tr>
+                                <td>
+                                    <div class="form-check">
+                                        <input class="form-check-input whitelist-checkbox" type="checkbox">
+                                    </div>
+                                </td>
+                                <td><span class="badge bg-success">Command Line</span></td>
+                                <td>powershell.exe</td>
+                                <td><code>.*\\Microsoft\\Windows\\.*</code></td>
+                                <td>system</td>
+                                <td>2025-03-08</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-info me-1" data-bs-toggle="modal" data-bs-target="#whitelistDetailModal">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            
+                            <!-- File Path Exception -->
+                            <tr>
+                                <td>
+                                    <div class="form-check">
+                                        <input class="form-check-input whitelist-checkbox" type="checkbox">
+                                    </div>
+                                </td>
+                                <td><span class="badge bg-info">File Path</span></td>
+                                <td>All</td>
+                                <td><code>C:\\Program Files\\Legitimate Software\\.*</code></td>
+                                <td>administrator</td>
+                                <td>2025-03-05</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-info me-1" data-bs-toggle="modal" data-bs-target="#whitelistDetailModal">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            
+                            <!-- Hash Whitelist -->
+                            <tr>
+                                <td>
+                                    <div class="form-check">
+                                        <input class="form-check-input whitelist-checkbox" type="checkbox">
+                                    </div>
+                                </td>
+                                <td><span class="badge bg-warning text-dark">File Hash</span></td>
+                                <td>regsvr32.exe</td>
+                                <td><code>5a78aabc1c7c764d75d1c274739e1b59c66f6423ddfa5c1b3a...[SHA256]</code></td>
+                                <td>system</td>
+                                <td>2025-03-01</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-info me-1" data-bs-toggle="modal" data-bs-target="#whitelistDetailModal">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            
+                            <!-- User/Process Whitelist -->
+                            <tr>
+                                <td>
+                                    <div class="form-check">
+                                        <input class="form-check-input whitelist-checkbox" type="checkbox">
+                                    </div>
+                                </td>
+                                <td><span class="badge bg-secondary">User/Process</span></td>
+                                <td>wmic.exe</td>
+                                <td><code>SYSTEM:wmic.exe:process call create</code></td>
+                                <td>administrator</td>
+                                <td>2025-02-28</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-info me-1" data-bs-toggle="modal" data-bs-target="#whitelistDetailModal">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer d-flex justify-content-between align-items-center">
+                <div>
+                    <select id="pageSizeSelect" class="form-select form-select-sm d-inline-block" style="width: auto; background-color: #1e2b38; color: #ecf0f1; border-color: rgba(255,255,255,0.1);">
+                        <option value="10">10 per page</option>
+                        <option value="25">25 per page</option>
+                        <option value="50">50 per page</option>
+                        <option value="100">100 per page</option>
+                    </select>
+                </div>
+                <nav aria-label="Whitelist pagination">
+                    <ul class="pagination pagination-sm mb-0">
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
+                        </li>
+                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                        <li class="page-item">
+                            <a class="page-link" href="#">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Whitelist Modal -->
+    <div class="modal fade" id="addWhitelistModal" tabindex="-1" aria-labelledby="addWhitelistModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content bg-dark text-light">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addWhitelistModalLabel">Add Whitelist Entry</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addWhitelistForm">
+                        <div class="mb-3">
+                            <label for="whitelistType" class="form-label">Whitelist Type</label>
+                            <select class="form-select" id="whitelistType">
+                                <option value="" selected disabled>Select whitelist type</option>
+                                <option value="process">Process Path</option>
+                                <option value="commandline">Command Line Pattern</option>
+                                <option value="filepath">File Path</option>
+                                <option value="hash">File Hash</option>
+                                <option value="user">User/Process Combination</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="whitelistLolbin" class="form-label">LOLBin</label>
+                            <select class="form-select" id="whitelistLolbin">
+                                <option value="all">All LOLBins</option>
+                                <option value="certutil.exe">certutil.exe</option>
+                                <option value="powershell.exe">powershell.exe</option>
+                                <option value="regsvr32.exe">regsvr32.exe</option>
+                                <option value="mshta.exe">mshta.exe</option>
+                                <option value="wmic.exe">wmic.exe</option>
+                                <option value="bitsadmin.exe">bitsadmin.exe</option>
+                                <option value="msbuild.exe">msbuild.exe</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="whitelistPattern" class="form-label">Pattern/Value</label>
+                            <input type="text" class="form-control" id="whitelistPattern" placeholder="Enter pattern or value...">
+                            <div class="form-text text-light">
+                                For Process: Full path to whitelisted binary<br>
+                                For Command Line: Regex pattern to match commands<br>
+                                For File Path: Path to whitelisted directory/file<br>
+                                For File Hash: SHA256 hash of whitelisted file<br>
+                                For User/Process: username:process:command_pattern format
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="whitelistReason" class="form-label">Reason</label>
+                            <textarea class="form-control" id="whitelistReason" rows="3" placeholder="Why is this being whitelisted?"></textarea>
+                        </div>
+                        
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="whitelistTemporary">
+                            <label class="form-check-label" for="whitelistTemporary">Temporary whitelist</label>
+                        </div>
+                        
+                        <div class="mb-3" id="whitelistExpiryContainer" style="display: none;">
+                            <label for="whitelistExpiry" class="form-label">Expiry Date</label>
+                            <input type="date" class="form-control" id="whitelistExpiry">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="addWhitelistBtn">Add Whitelist Entry</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Whitelist Detail Modal -->
+    <div class="modal fade" id="whitelistDetailModal" tabindex="-1" aria-labelledby="whitelistDetailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content bg-dark text-light">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="whitelistDetailModalLabel">Whitelist Entry Details</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p class="text-white-50 mb-1">Type</p>
+                            <p class="fw-bold mb-3" id="detailType">
+                                <span class="badge bg-success">Command Line</span>
+                            </p>
+                            
+                            <p class="text-white-50 mb-1">LOLBin</p>
+                            <p class="fw-bold mb-3" id="detailLolbin">powershell.exe</p>
+                            
+                            <p class="text-white-50 mb-1">Added By</p>
+                            <p class="fw-bold mb-3" id="detailAddedBy">administrator</p>
+                            
+                            <p class="text-white-50 mb-1">Date Added</p>
+                            <p class="fw-bold mb-3" id="detailDateAdded">2025-03-08 14:25:36</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="text-white-50 mb-1">Status</p>
+                            <p class="fw-bold mb-3" id="detailStatus">
+                                <span class="badge bg-success">Active</span>
+                            </p>
+                            
+                            <p class="text-white-50 mb-1">Expiry</p>
+                            <p class="fw-bold mb-3" id="detailExpiry">Never (Permanent)</p>
+                            
+                            <p class="text-white-50 mb-1">Last Modified</p>
+                            <p class="fw-bold mb-3" id="detailLastModified">Never</p>
+                            
+                            <p class="text-white-50 mb-1">False Positives Prevented</p>
+                            <p class="fw-bold mb-3" id="detailPreventedCount">12</p>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-12">
+                            <p class="text-white-50 mb-1">Pattern/Value</p>
+                            <div class="bg-dark p-3 rounded border border-secondary mb-3">
+                                <code id="detailPattern">.*\\Microsoft\\Windows\\.*</code>
+                            </div>
+                            
+                            <p class="text-white-50 mb-1">Reason</p>
+                            <div class="bg-dark p-3 rounded border border-secondary">
+                                <p id="detailReason" class="mb-0">Legitimate PowerShell scripts run by Windows scheduled tasks in the Microsoft directory. These are verified Windows components and should be excluded from detection.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-warning me-auto" id="editWhitelistBtn">Edit</button>
+                    <button type="button" class="btn btn-outline-danger me-2" id="deleteWhitelistBtn">Delete</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Toggle temporary whitelist expiry field
+            document.getElementById('whitelistTemporary').addEventListener('change', function() {
+                document.getElementById('whitelistExpiryContainer').style.display = this.checked ? 'block' : 'none';
+            });
+            
+            // Handle checkboxes for whitelist entries
+            const selectAllCheckbox = document.getElementById('selectAllWhitelist');
+            const whitelistCheckboxes = document.querySelectorAll('.whitelist-checkbox');
+            const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+            
+            // Select all checkbox
+            selectAllCheckbox.addEventListener('change', function() {
+                whitelistCheckboxes.forEach(checkbox => {
+                    checkbox.checked = this.checked;
+                });
+                updateDeleteButtonState();
+            });
+            
+            // Individual checkboxes
+            whitelistCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', updateDeleteButtonState);
+            });
+            
+            // Update delete button state
+            function updateDeleteButtonState() {
+                const checkedCount = document.querySelectorAll('.whitelist-checkbox:checked').length;
+                deleteSelectedBtn.disabled = checkedCount === 0;
+            }
+            
+            // Delete selected button
+            deleteSelectedBtn.addEventListener('click', function() {
+                if (confirm('Are you sure you want to delete the selected whitelist entries?')) {
+                    // In a real app, this would send a request to the server to delete the entries
+                    alert('Selected whitelist entries deleted');
+                    // Refresh the table or remove selected rows
+                }
+            });
+            
+            // Export whitelist button
+            document.getElementById('exportWhitelistBtn').addEventListener('click', function() {
+                alert('Exporting whitelist to JSON file');
+                // In a real app, this would trigger a file download
+            });
+            
+            // Add whitelist entry button
+            document.getElementById('addWhitelistBtn').addEventListener('click', function() {
+                const type = document.getElementById('whitelistType').value;
+                const lolbin = document.getElementById('whitelistLolbin').value;
+                const pattern = document.getElementById('whitelistPattern').value;
+                const reason = document.getElementById('whitelistReason').value;
+                
+                if (!type || !pattern) {
+                    alert('Please fill in all required fields');
+                    return;
+                }
+                
+                // In a real app, this would send a request to the server to add the entry
+                alert('Whitelist entry added successfully');
+                
+                // Close the modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('addWhitelistModal'));
+                modal.hide();
+                
+                // Reset form
+                document.getElementById('addWhitelistForm').reset();
+                document.getElementById('whitelistExpiryContainer').style.display = 'none';
+            });
+            
+            // Apply filters button
+            document.getElementById('applyFiltersBtn').addEventListener('click', function() {
+                // In a real app, this would filter the table based on the selected filters
+                alert('Filters applied to whitelist entries');
+            });
+        });
+    </script>
+</body>
+</html>

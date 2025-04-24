@@ -1,1 +1,1 @@
-{"alerts": []}
+{"alerts": [{"timestamp": "2025-04-24 04:43:33", "rule_name": "Service Started", "description": "The LOLBins IDS notification service has started successfully.", "severity": 1, "process_name": "notification_service.py", "command_line": "notification_service.py --dashboard-url http://localhost:5000", "pid": 30428, "username": "asus"}]}

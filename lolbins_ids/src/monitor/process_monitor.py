@@ -4,6 +4,13 @@ import sys
 import os
 from notification.notification_orchestrator import NotificationOrchestrator
 from datetime import datetime
+from database.connection import DatabaseConnection
+from database.process_history import ProcessHistoryDB
+from alerts.mongo_alert_method import MongoAlertMethod
+from alerts.alert_system import AlertMethod
+from alerts.alert_system import AlertManager
+from database.process_history import ProcessHistoryDB
+from database.connection import DatabaseConnection
 
 # Add parent directory to path to import from other modules
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -29,6 +36,11 @@ class ProcessMonitor:
         
         # Setup basic logging
         self.setup_logging()
+        
+        self.process_history_db = ProcessHistoryDB()
+        
+        self.db_connection = DatabaseConnection.get_instance()
+        self.db = self.db_connection.db
         
         # Initialize the rule engine
         self.rule_engine = RuleEngine()
@@ -77,12 +89,26 @@ class ProcessMonitor:
         Analyze detected LOLBin process
         """
         try:
+            # Store process in history collection
+            process_doc = {
+                "timestamp": datetime.now(),
+                "process_name": process_info['name'].lower(),
+                "command_line": ' '.join(process_info.get('cmdline', [])),
+                "pid": process_info.get('pid', 0),
+                "username": process_info.get('username', '')
+            }
+            
+            self.db.process_history.insert_one(process_doc)
+            
             # Get current timestamp for logging
             current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             logging.info(f"LOLBin detected: {process_info['name']} (PID: {process_info['pid']}) at {current_time}")
             
             # Pass to rule engine for analysis
             alerts = self.rule_engine.analyze_process(process_info)
+            
+            self.process_history_db.add_process(process_info)
+            
             
             if alerts:
                 logging.warning(f"ALERT: Found {len(alerts)} suspicious behaviors!")

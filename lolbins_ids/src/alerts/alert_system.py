@@ -5,6 +5,8 @@ import os
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime
+import pymongo
+from pymongo import MongoClient
 
 class AlertManager:
     """
@@ -29,7 +31,8 @@ class AlertManager:
             "alert_methods": {
                 "console": True,
                 "file": True,
-                "email": False
+                "email": False,
+                "mongodb": True  # Enable MongoDB by default
             },
             "email_config": {
                 "server": "smtp.gmail.com",
@@ -38,30 +41,46 @@ class AlertManager:
                 "password": "",
                 "recipients": []
             },
+            "mongodb_config": {
+                "connection_string": "mongodb://localhost:27017/",
+                "db_name": "lolbins_ids"
+            },
             "alert_levels": ["critical", "high", "medium"],  # Which severity levels to alert on
             "alert_file": "alerts.json"
         }
         
+        # Debug output
+        logging.info(f"Looking for config file: {config_file}")
+        
         if config_file and os.path.exists(config_file):
             try:
+                logging.info(f"Found config file: {config_file}")
                 with open(config_file, 'r') as f:
-                    return json.load(f)
+                    loaded_config = json.load(f)
+                logging.info(f"Loaded config: {json.dumps(loaded_config, indent=2)}")
+                return loaded_config
             except Exception as e:
                 logging.error(f"Error loading config file: {str(e)}")
                 return default_config
-        
-        return default_config
+        else:
+            if config_file:
+                logging.info(f"Config file not found: {config_file}")
+            else:
+                logging.info("No config file specified, using defaults")
+            return default_config
     
     def _setup_alert_methods(self):
         """Setup alert methods based on configuration"""
         if self.config["alert_methods"].get("console", True):
             self.alert_methods.append(ConsoleAlertMethod())
-            
+            logging.info("Console alert method enabled")
+        
         if self.config["alert_methods"].get("file", True):
             self.alert_methods.append(
                 FileAlertMethod(self.config.get("alert_file", "alerts.json"))
             )
-            
+            logging.info("File alert method enabled")
+        
         if self.config["alert_methods"].get("email", False):
             email_config = self.config.get("email_config", {})
             if all(k in email_config for k in ["server", "port", "username", "password", "recipients"]):
@@ -72,8 +91,23 @@ class AlertManager:
                     password=email_config["password"],
                     recipients=email_config["recipients"]
                 ))
+                logging.info("Email alert method enabled")
             else:
                 logging.warning("Email alerting disabled: Missing configuration parameters")
+        
+        # Add MongoDB alert method
+        if self.config["alert_methods"].get("mongodb", True):  # Enable by default
+            mongodb_config = self.config.get("mongodb_config", {})
+            connection_string = mongodb_config.get("connection_string", "mongodb://localhost:27017/")
+            db_name = mongodb_config.get("db_name", "lolbins_ids")
+            try:
+                self.alert_methods.append(MongoDBAlertMethod(
+                    connection_string=connection_string,
+                    db_name=db_name
+                ))
+                logging.info("MongoDB alert method enabled")
+            except Exception as e:
+                logging.error(f"Failed to initialize MongoDB alert method: {str(e)}")
     
     def should_alert(self, severity):
         """
@@ -121,7 +155,46 @@ class AlertMethod:
         """Send an alert (to be implemented by subclasses)"""
         raise NotImplementedError("Subclasses must implement send_alert()")
 
-
+# Add to src/alerts/alert_system.py
+class MongoDBAlertMethod(AlertMethod):
+    """Alert method that saves to MongoDB"""
+    def __init__(self, connection_string="mongodb://localhost:27017/", db_name="lolbins_ids"):
+        try:
+            from pymongo import MongoClient
+            self.client = MongoClient(connection_string, serverSelectionTimeoutMS=5000)
+            
+            # Test connection
+            self.client.admin.command('ping')
+            logging.info("MongoDB connection successful")
+            
+            self.db = self.client[db_name]
+            self.alerts_collection = self.db["alerts"]
+            
+            # Create indexes for better querying
+            self.alerts_collection.create_index("timestamp")
+            self.alerts_collection.create_index("severity")
+            self.alerts_collection.create_index("rule_name")
+            self.alerts_collection.create_index("process_name")
+            
+            self.connection_ok = True
+            logging.info("MongoDB alert method initialized successfully")
+        except Exception as e:
+            self.connection_ok = False
+            logging.error(f"Error initializing MongoDB alert method: {str(e)}")
+    
+    def send_alert(self, alert_data):
+        try:
+            if not hasattr(self, 'connection_ok') or not self.connection_ok:
+                logging.error("MongoDB connection not available")
+                return False
+                
+            # Insert alert into MongoDB
+            result = self.alerts_collection.insert_one(alert_data)
+            logging.info(f"Alert saved to MongoDB with ID: {result.inserted_id}")
+            return True
+        except Exception as e:
+            logging.error(f"Error writing alert to MongoDB: {str(e)}")
+            return False
 class ConsoleAlertMethod(AlertMethod):
     """Alert method that prints to console"""
     def send_alert(self, alert_data):
