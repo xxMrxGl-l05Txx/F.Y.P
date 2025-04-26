@@ -13,9 +13,35 @@ from rules.enhanced_rule_engine import EnhancedRuleEngine
 from alerts.alert_system import AlertManager
 from utils.performance_monitor import PerformanceMonitor
 from notification.notification_orchestrator import NotificationOrchestrator
-from src.database.connection import DatabaseConnection
+# from src.database.connection import DatabaseConnection
 import pymongo
-from src.analysis.threat_analyzer import ThreatAnalyzer
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from analysis.threat_analyzer import ThreatAnalyzer
+
+# Initialize logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger('dashboard')
+
+# Initialize Flask app
+app = Flask(__name__)
+app.config['SECRET_KEY'] = 'lolbins_ids_secret_key'
+socketio = SocketIO(app, cors_allowed_origins="*")
+
+# Initialize components
+alert_manager = AlertManager()
+rule_engine = EnhancedRuleEngine()
+performance_monitor = PerformanceMonitor()
+
+# Initialize notification orchestrator
+notification_orchestrator = NotificationOrchestrator()
+
+# Path to alerts file
+ALERTS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'alerts.json')
+if not os.path.exists(ALERTS_FILE):
+    ALERTS_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'alerts.json')
 
 @app.route('/analysis')
 def analysis_dashboard():
@@ -27,30 +53,24 @@ def analysis_dashboard():
     lolbin_usage = analyzer.get_common_lolbin_usage(days=7)
     mitre_summary = analyzer.get_mitre_attack_summary(days=7)
     
-    return render_template(
-        'analysis.html',
-        attack_patterns=attack_patterns,
-        high_risk_users=high_risk_users,
-        lolbin_usage=lolbin_usage,
-        mitre_summary=mitre_summary
-    )
-
-def get_recent_alerts(limit=10):
-    """Get recent alerts for dashboard display"""
-    return list(db.alerts.find(
-        {}, 
-        sort=[("timestamp", pymongo.DESCENDING)],
-        limit=limit
-    ))
+    # Database connection setup
+    client = pymongo.MongoClient("mongodb://localhost:27017/")
+    db = client.lolbins_ids
     
-    
-def get_alerts_by_severity():
-    """Get count of alerts by severity level"""
+    # Define the aggregation pipeline
     pipeline = [
-        {"$group": {"_id": "$severity", "count": {"$sum": 1}}},
-        {"$sort": {"_id": 1}}  # Sort by severity
+        {"$match": {"timestamp": {"$gte": datetime.now() - timedelta(days=7)}}},
+        {"$sort": {"severity": -1}}
     ]
-    return list(db.alerts.aggregate(pipeline))
+    
+    alerts_data = list(db.alerts.aggregate(pipeline))
+    
+    return render_template('analysis.html', 
+                          attack_patterns=attack_patterns,
+                          high_risk_users=high_risk_users,
+                          lolbin_usage=lolbin_usage,
+                          mitre_summary=mitre_summary,
+                          alerts=alerts_data)
 
 # Initialize logging
 logging.basicConfig(

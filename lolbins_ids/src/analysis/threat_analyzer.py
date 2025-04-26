@@ -1,4 +1,9 @@
 # src/analysis/threat_analyzer.py
+import sys
+import os
+# Add project root to path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+# Now you can use the full src path
 from src.database.connection import DatabaseConnection
 import pymongo
 from datetime import datetime, timedelta

