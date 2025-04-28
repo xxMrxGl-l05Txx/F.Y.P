@@ -318,49 +318,49 @@
     </style>
 </head>
 <body>
-    <!-- Sidebar - Same as dashboard -->
+    <!-- Sidebar -->
     <div class="sidebar">
         <div class="sidebar-header">
-            <a href="/" class="sidebar-brand">
+            <a href="/dashboard" class="sidebar-brand">
                 <i class="fas fa-shield-alt"></i>
                 <span>LOLBins IDS</span>
             </a>
         </div>
         <div class="sidebar-menu">
             <div class="menu-header">Monitoring</div>
-            <a href="dashboard.html" class="sidebar-link">
+            <a href="/dashboard" class="sidebar-link">
                 <i class="fas fa-tachometer-alt"></i>
                 <span>Dashboard</span>
             </a>
-            <a href="alerts.html" class="sidebar-link active">
+            <a href="/alerts" class="sidebar-link">
                 <i class="fas fa-exclamation-triangle"></i>
                 <span>Alerts</span>
             </a>
-            <a href="analytics.html" class="sidebar-link">
+            <a href="/analytics" class="sidebar-link">
                 <i class="fas fa-chart-line"></i>
                 <span>Analytics</span>
             </a>
             
             <div class="menu-header">Management</div>
-            <a href="settings.html" class="sidebar-link">
+            <a href="/settings" class="sidebar-link">
                 <i class="fas fa-cog"></i>
                 <span>Settings</span>
             </a>
-            <a href="reports.html" class="sidebar-link">
+            <a href="/reports" class="sidebar-link">
                 <i class="fas fa-file-alt"></i>
                 <span>Reports</span>
             </a>
-            <a href="rules.html" class="sidebar-link">
+            <a href="/rules" class="sidebar-link">
                 <i class="fas fa-list-check"></i>
                 <span>Rules</span>
             </a>
-            <a href="whitelist.html" class="sidebar-link">
+            <a href="/whitelist" class="sidebar-link">
                 <i class="fas fa-shield-halved"></i>
                 <span>Whitelist</span>
             </a>
             
             <div class="menu-header">System</div>
-            <a href="/about" class="sidebar-link">
+            <a href="/about" class="sidebar-link active">
                 <i class="fas fa-info-circle"></i>
                 <span>About</span>
             </a>
@@ -522,6 +522,19 @@
                     <h5 class="modal-title" id="alertDetailModalLabel">Alert Details</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
+                <div class="alert-detail-item">
+                    <div class="alert-detail-label">MITRE ATT&CK Techniques</div>
+                    <div id="mitreTechniques">
+                        <span class="badge bg-secondary me-1 mb-1">T1059.001 - PowerShell</span>
+                        <span class="badge bg-secondary me-1 mb-1">T1027 - Obfuscated Files or Information</span>
+                        <span class="badge bg-secondary me-1 mb-1">T1105 - Ingress Tool Transfer</span>
+                    </div>
+                    <div class="mt-2" id="mitreMitigationContainer">
+                        <a id="mitreMitigationLink" href="#" target="_blank" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-shield-alt me-1"></i> View Mitigation Steps
+                        </a>
+                    </div>
+                </div>        
                 <div class="modal-body">
                     <div class="alert-detail-item">
                         <div class="alert-detail-label">Rule</div>
@@ -812,39 +825,53 @@
             });
         }
         
-        function showAlertDetails(alert) {
-            // Set alert details in modal
-            document.getElementById('detailRule').textContent = alert.rule_name;
-            
-            const severityElement = document.querySelector('#alertDetailModal .severity-badge');
-            severityElement.className = `severity-badge severity-${alert.severity} me-2`;
-            severityElement.textContent = alert.severity;
-            
-            let severityText = '';
-            switch(alert.severity) {
-                case 1: severityText = 'Low'; break;
-                case 2: severityText = 'Medium-Low'; break;
-                case 3: severityText = 'Medium'; break;
-                case 4: severityText = 'Medium-High'; break;
-                case 5: severityText = 'High'; break;
-                default: severityText = 'Unknown';
-            }
-            document.getElementById('detailSeverityText').textContent = severityText;
-            
-            document.getElementById('detailTimestamp').textContent = alert.timestamp;
-            document.getElementById('detailProcess').textContent = `${alert.process_name} (PID: ${alert.pid})`;
-            document.getElementById('detailUser').textContent = alert.username;
-            document.getElementById('detailCommand').textContent = alert.command_line || 'N/A';
-            
-            // For demonstration purposes - in reality would need actual decoding logic
-            let decodedCommand = 'N/A';
-            if (alert.process_name === 'powershell.exe' && alert.command_line && alert.command_line.includes('-EncodedCommand')) {
-                decodedCommand = 'PowerShell encoded command (decoding not implemented in demo)';
-            }
-            document.getElementById('detailDecodedCommand').textContent = decodedCommand;
-            
-            document.getElementById('detailDescription').textContent = alert.description;
-        }
+function showAlertDetails(alert) {
+    // Set basic alert details
+    document.getElementById('detailRule').textContent = alert.rule_name;
+    
+    // Set severity text based on severity level
+    let severityText = 'Unknown';
+    switch(parseInt(alert.severity)) {
+        case 1: severityText = 'Low'; break;
+        case 2: severityText = 'Medium-Low'; break;
+        case 3: severityText = 'Medium'; break;
+        case 4: severityText = 'Medium-High'; break;
+        case 5: severityText = 'High'; break;
+    }
+    document.getElementById('detailSeverityText').textContent = severityText;
+    
+    // Set other details
+    document.getElementById('detailTimestamp').textContent = alert.timestamp;
+    document.getElementById('detailProcess').textContent = alert.process_name + (alert.pid ? ` (PID: ${alert.pid})` : '');
+    document.getElementById('detailUser').textContent = alert.username;
+    document.getElementById('detailCommand').textContent = alert.command_line || 'N/A';
+    
+    // MITRE ATT&CK information
+    // Create a default mitigation URL based on rule name
+    let mitigationUrl = '#';
+    
+    if (alert.rule_name === "PowerShell Encoded Command") {
+        mitigationUrl = "https://attack.mitre.org/techniques/T1059/001/mitigations/";
+    } else if (alert.rule_name === "CertUtil Download") {
+        mitigationUrl = "https://attack.mitre.org/techniques/T1105/mitigations/";
+    } else if (alert.rule_name === "Regsvr32 AppLocker Bypass") {
+        mitigationUrl = "https://attack.mitre.org/techniques/T1218/010/mitigations/";
+    } else if (alert.rule_name === "MSHTA Suspicious Execution") {
+        mitigationUrl = "https://attack.mitre.org/techniques/T1218/005/mitigations/";
+    } else if (alert.rule_name === "WMIC Process Creation") {
+        mitigationUrl = "https://attack.mitre.org/techniques/T1047/mitigations/";
+    }
+    
+    // Get the mitigation link element and update it
+    const mitigationLink = document.getElementById('mitreMitigationLink');
+    
+    // Set the href attribute directly and ensure it opens in a new tab
+    mitigationLink.setAttribute('href', mitigationUrl);
+    mitigationLink.setAttribute('target', '_blank');
+    
+    // Let the browser handle the link naturally through the href and target attributes
+    // No need for a custom onclick handler that could interfere with normal link behavior
+}
     </script>
 </body>
 </html>

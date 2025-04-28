@@ -57,6 +57,24 @@ class MongoDataProvider:
             "top_rules": top_rules,
             "top_lolbins": top_lolbins
         }
+    
+    def get_filtered_alerts(self, days=7, severity='all'):
+        """Get filtered alerts based on time range and severity"""
+        end_date = datetime.now()
+        start_date = end_date - timedelta(days=days)
+        
+        # Build query
+        query = {"timestamp": {"$gte": start_date.strftime("%Y-%m-%d %H:%M:%S")}}
+        
+        # Add severity filter if specified
+        if severity != 'all':
+            query["severity"] = int(severity)
+        
+        # Get filtered data
+        return list(self.db.alerts.find(
+            query, 
+            sort=[("timestamp", pymongo.DESCENDING)]
+        ))
 
 
 class DataProvider:

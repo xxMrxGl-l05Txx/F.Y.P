@@ -7,6 +7,32 @@ from email.mime.multipart import MIMEMultipart
 from datetime import datetime
 import pymongo
 from pymongo import MongoClient
+from utils.mitre_mappings import MITRE_ATTACK_MAPPINGS
+
+def create_alert(rule_name, process_info, **kwargs):
+    # Create alert document
+    alert = {
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "rule_name": rule_name,
+        "process_name": process_info.get("name", "Unknown"),
+        "pid": process_info.get("pid", "Unknown"),
+        "command_line": process_info.get("command_line", "Unknown"),
+        **kwargs
+    }
+    
+    # Add MITRE ATT&CK information if available
+    if rule_name in MITRE_ATTACK_MAPPINGS:
+        alert["mitre_attack"] = MITRE_ATTACK_MAPPINGS[rule_name]
+    
+    # Store in database
+    try:
+        client = MongoClient("mongodb://localhost:27017/")
+        db = client["lolbins_ids"]
+        db.alerts.insert_one(alert)
+    except Exception as e:
+        logging.error(f"Failed to store alert in database: {str(e)}")
+    
+    return alert
 
 class AlertManager:
     """

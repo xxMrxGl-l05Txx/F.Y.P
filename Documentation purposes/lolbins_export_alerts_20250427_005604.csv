@@ -1,0 +1,2 @@
+timestamp,rule_name,description,severity,process_name,command_line,pid,username
+2025-04-24 04:43:33,Service Started,The LOLBins IDS notification service has started successfully.,1,notification_service.py,notification_service.py --dashboard-url http://localhost:5000,30428,asus

@@ -1262,10 +1262,96 @@
                         <li class="list-group-item bg-dark border-secondary">certutil.exe -decode certificate.crt</li>
                     `;
                     
-                    // Reset context
-                    document.getElementById('detailContextEnabled').innerHTML = `<span class="badge bg-secondary">No context awareness enabled</span>`;
-                    document.getElementById('detailContextProcesses').innerHTML = `<span class="badge bg-secondary">None</span>`;
-            }
+            // Reset context
+            document.getElementById('detailContextEnabled').innerHTML = `<span class="badge bg-secondary">No context awareness enabled</span>`;
+            document.getElementById('detailContextProcesses').innerHTML = `<span class="badge bg-secondary">None</span>`;
+    }
+    
+    // Update MITRE ATT&CK information based on rule name
+    // Find the MITRE techniques and tactics divs in the mitre tab
+    const techniquesDiv = document.querySelector('#mitre .d-flex.flex-wrap.gap-2.mb-3');
+    const tacticsDiv = document.querySelector('#mitre .d-flex.flex-wrap.gap-2:not(.mb-3)');
+    const mitigationLink = document.getElementById('mitre').querySelector('a') || document.createElement('a');
+    
+    // Clear previous content
+    techniquesDiv.innerHTML = '';
+    tacticsDiv.innerHTML = '';
+    
+    // Set the appropriate values based on rule name
+    let techniqueId = '';
+    let techniqueName = '';
+    let tactic = '';
+    let mitigationUrl = '#';
+    
+    if (ruleName === "PowerShell Encoded Command") {
+        techniqueId = 'T1059.001';
+        techniqueName = 'Command and Scripting Interpreter: PowerShell';
+        tactic = 'Execution';
+        mitigationUrl = 'https://attack.mitre.org/techniques/T1059/001/mitigations/';
+    } else if (ruleName === "CertUtil Download") {
+        techniqueId = 'T1105';
+        techniqueName = 'Ingress Tool Transfer';
+        tactic = 'Command and Control';
+        mitigationUrl = 'https://attack.mitre.org/techniques/T1105/mitigations/';
+    } else if (ruleName === "Regsvr32 AppLocker Bypass") {
+        techniqueId = 'T1218.010';
+        techniqueName = 'System Binary Proxy Execution: Regsvr32';
+        tactic = 'Defense Evasion';
+        mitigationUrl = 'https://attack.mitre.org/techniques/T1218/010/mitigations/';
+    } else if (ruleName === "MSHTA Suspicious Execution") {
+        techniqueId = 'T1218.005';
+        techniqueName = 'System Binary Proxy Execution: MSHTA';
+        tactic = 'Defense Evasion';
+        mitigationUrl = 'https://attack.mitre.org/techniques/T1218/005/mitigations/';
+    } else if (ruleName === "WMIC Process Creation") {
+        techniqueId = 'T1047';
+        techniqueName = 'Windows Management Instrumentation';
+        tactic = 'Execution';
+        mitigationUrl = 'https://attack.mitre.org/techniques/T1047/mitigations/';
+    } else if (ruleName === "BITSAdmin File Transfer") {
+        techniqueId = 'T1197';
+        techniqueName = 'BITS Jobs';
+        tactic = 'Defense Evasion, Persistence';
+        mitigationUrl = 'https://attack.mitre.org/techniques/T1197/mitigations/';
+    } else if (ruleName === "MSBuild Inline Task") {
+        techniqueId = 'T1127';
+        techniqueName = 'Trusted Developer Utilities Proxy Execution';
+        tactic = 'Defense Evasion';
+        mitigationUrl = 'https://attack.mitre.org/techniques/T1127/mitigations/';
+    }
+    
+    // Update the techniques div
+    if (techniqueId && techniqueName) {
+        techniquesDiv.innerHTML = `
+            <span class="badge bg-secondary p-2">${techniqueId} - ${techniqueName}</span>
+        `;
+    } else {
+        techniquesDiv.innerHTML = '<span class="text-muted">No MITRE technique information available</span>';
+    }
+    
+    // Update the tactics div
+    if (tactic) {
+        tacticsDiv.innerHTML = `
+            <span class="badge bg-secondary p-2">${tactic}</span>
+        `;
+    } else {
+        tacticsDiv.innerHTML = '<span class="text-muted">No MITRE tactic information available</span>';
+    // Update the mitigation link
+    if (mitigationUrl !== '#') {
+        mitigationLink.setAttribute('href', mitigationUrl);
+        mitigationLink.setAttribute('target', '_blank');
+        mitigationLink.style.display = 'inline-block';
+        
+        // Ensure the link opens in a new tab
+        mitigationLink.onclick = function(e) {
+            window.open(mitigationUrl, '_blank');
+            e.preventDefault();
+        };
+    } else {
+        mitigationLink.style.display = 'none';
+    }
+}
+                }
         }
         
         // Function to toggle rule status
