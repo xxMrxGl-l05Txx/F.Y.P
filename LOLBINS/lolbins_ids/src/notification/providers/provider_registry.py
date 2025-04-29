@@ -1,7 +1,7 @@
 # src/notification/providers/provider_registry.py
-import socket
 import logging
 from .tkinter_notifier import TkinterNotifierProvider
+from .websocket_provider import WebSocketProvider
 
 # Import the email provider if needed
 try:
@@ -18,7 +18,7 @@ class ProviderRegistry:
         providers = {
             'system_tray': TkinterNotifierProvider,
             'email': EmailProvider if EMAIL_AVAILABLE else None,
-            'websocket': None  # Placeholder for future websocket implementation
+            'websocket': WebSocketProvider  # Properly reference the WebSocketProvider
         }
         
         if provider_name in providers and providers[provider_name]:

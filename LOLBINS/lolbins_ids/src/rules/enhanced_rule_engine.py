@@ -203,6 +203,43 @@ class EnhancedRuleEngine:
             ]
         )
     )
+        
+        # Sophisticated PowerShell obfuscation detection
+        self.rules.append(
+            EnhancedRule(
+                name="PowerShell Advanced Obfuscation",
+                description="PowerShell using advanced obfuscation techniques",
+                lolbin="powershell.exe",
+                pattern=r"(`|-replace|-join|split|\+|ForEach|char|\[char\]|\-bxor|\-f|\$\(\[char\]\d+)",
+                severity=5,
+                whitelist_patterns=[
+                    r"\\Program Files\\",
+                    r"\\WindowsPowerShell\\Modules\\"
+                ]
+            )
+        )
+
+        # Command prompt evasion techniques
+        self.rules.append(
+            EnhancedRule(
+                name="CMD Obfuscation",
+                description="Command prompt using obfuscation to evade detection",
+                lolbin="cmd.exe",
+                pattern=r"(\^|%[A-Za-z0-9_]+%|\|+|\s+/V:ON)",
+                severity=4
+            )
+        )
+
+        # WMIC fileless execution
+        self.rules.append(
+            EnhancedRule(
+                name="WMIC Fileless Execution",
+                description="WMIC executing XSL scripts for fileless execution",
+                lolbin="wmic.exe",
+                pattern=r"(format:|\*+from\s+)/format:.+\.xsl",
+                severity=5
+            )
+        )
 
         # Add new rule for suspicious PowerShell commands
         self.rules.append(
@@ -270,6 +307,21 @@ class EnhancedRuleEngine:
                 severity=5
             )
         )
+        
+        # Add this rule for detecting PowerShell obfuscation techniques
+        self.rules.append(
+            EnhancedRule(
+                name="PowerShell Obfuscation Techniques",
+                description="PowerShell using obfuscation to evade detection",
+                lolbin="powershell.exe",
+                pattern=r"((\^|`|-join|split|\+|ForEach|\$\(.+\)join)|(-replace\s+['\"]\w+['\"],['\"]\w+['\"]))|((\w+)-(\w+)-(\w+))",
+                severity=4,
+                whitelist_patterns=[
+                    r"\\Program Files\\",
+                    r"\\WindowsPowerShell\\Modules\\"
+                ]
+            )
+        )
     
     def update_process_history(self, process_info):
         """Update the process history for context-aware detection"""
@@ -313,6 +365,7 @@ class EnhancedRuleEngine:
         results = []
         process_name = process_info.get('name', '').lower()
         cmdline = ' '.join(process_info.get('cmdline', []))
+        username = process_info.get('username', 'SYSTEM')  # Added missing username declaration
         user_history = self.process_history_db.get_user_context(username)
         
         # Create a cache key from process name and command line
@@ -320,6 +373,7 @@ class EnhancedRuleEngine:
         
         # Check cache first for previously analyzed commands
         with self.cache_lock:
+            # Check if we already analyzed this command
             if cache_key in self.rule_cache:
                 self.cache_hits += 1
                 return self.rule_cache[cache_key]
@@ -395,7 +449,7 @@ class EnhancedRuleEngine:
                     logging.warning(f"Rule triggered: {rule.name} (Severity: {adjusted_severity})")
                     results.append(alert)
         
-        # Update cache
+        # Update cache at the end of the method
         with self.cache_lock:
             # Only cache if results list is small (avoid memory growth)
             if len(results) < 5:
@@ -403,9 +457,18 @@ class EnhancedRuleEngine:
             
             # Limit cache size to prevent memory issues
             if len(self.rule_cache) > 10000:
-                # Clear half the cache when it gets too large
-                self.rule_cache = dict(list(self.rule_cache.items())[-5000:])            
-        
+                # Get the oldest keys - this is more efficient
+                keys_to_remove = list(self.rule_cache.keys())[:5000]
+                # Remove oldest entries
+                for key in keys_to_remove:
+                    if key in self.rule_cache:
+                        del self.rule_cache[key]
+                    
+            # Log cache efficiency stats periodically
+            if (self.cache_hits + self.cache_misses) % 1000 == 0 and (self.cache_hits + self.cache_misses) > 0:
+                hit_rate = (self.cache_hits / (self.cache_hits + self.cache_misses)) * 100
+                logging.info(f"Rule cache hit rate: {hit_rate:.1f}% (hits: {self.cache_hits}, misses: {self.cache_misses})")
+                    
         return results
 
 # For testing

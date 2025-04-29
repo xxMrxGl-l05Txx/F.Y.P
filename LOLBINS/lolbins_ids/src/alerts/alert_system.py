@@ -7,7 +7,7 @@ from email.mime.multipart import MIMEMultipart
 from datetime import datetime
 import pymongo
 from pymongo import MongoClient
-from src.utils.mitre_mappings import MITRE_ATTACK_MAPPINGS
+from utils.mitre_mappings import MITRE_ATTACK_MAPPINGS
 
 def create_alert(rule_name, process_info, **kwargs):
     # Create alert document

@@ -177,6 +177,28 @@ class NotificationOrchestrator:
             }
         ]
         
+        # Add these advanced correlation rules
+        self.correlation_rules.extend([
+            {
+                'name': 'Fileless Malware Chain',
+                'patterns': ['PowerShell.*', 'Regsvr32.*', 'WMIC.*'],
+                'time_window_minutes': 15,
+                'severity_boost': 2
+            },
+            {
+                'name': 'Defense Evasion Chain',
+                'patterns': ['PowerShell.*hidden', '(Set-MpPreference|Add-MpPreference)', 'Regsvr32.*'],
+                'time_window_minutes': 10,
+                'severity_boost': 2
+            },
+            {
+                'name': 'Data Exfiltration Attempt',
+                'patterns': ['.*Download', 'BITSAdmin.*', '(Invoke-WebRequest|New-Object Net\\.WebClient)'],
+                'time_window_minutes': 30,
+                'severity_boost': 2
+            }
+        ])
+        
         # Load custom rules if available
         custom_rules_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'config', 'correlation_rules.json')
         if os.path.exists(custom_rules_path):

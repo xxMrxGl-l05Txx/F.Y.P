@@ -1,0 +1,6 @@
+flask==2.0.1
+flask-socketio==5.1.1
+pymongo==4.0.1
+psutil==5.9.0
+pywin32==303
+python-socketio==5.5.0
